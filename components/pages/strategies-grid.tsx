@@ -77,7 +77,11 @@ const mockStrategies = [
   },
 ]
 
-export function StrategiesGrid() {
+interface StrategiesGridProps {
+  onSelectStrategy?: (strategyId: string) => void
+}
+
+export function StrategiesGrid({ onSelectStrategy }: StrategiesGridProps) {
   return (
     <div className="h-full overflow-auto bg-[#F3F4F6]">
       <div className="mx-auto max-w-7xl px-8 py-8">
@@ -117,6 +121,7 @@ export function StrategiesGrid() {
             return (
               <button
                 key={strategy.id}
+                onClick={() => onSelectStrategy?.(strategy.id)}
                 className="group flex flex-col rounded-xl border border-[#E5E7EB] bg-white p-6 text-left transition-all hover:border-[#2563EB]/30 hover:shadow-lg hover:shadow-[#2563EB]/5"
               >
                 {/* Icon & Type */}

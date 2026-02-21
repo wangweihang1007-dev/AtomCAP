@@ -7,7 +7,6 @@ import {
   FileText,
   GitBranch,
   BarChart3,
-  ArrowLeft,
   FolderOpen,
   PanelLeftClose,
   PanelLeft,
@@ -54,10 +53,9 @@ const subPageComponents: Record<SubPageKey, React.ComponentType> = {
 
 interface ProjectDetailProps {
   projectId: string
-  onBack: () => void
 }
 
-export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
+export function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
   const ActiveComponent = subPageComponents[activeSubPage]
@@ -71,17 +69,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           collapsed ? "w-[60px]" : "w-[200px]"
         )}
       >
-        {/* Back + Collapse Header */}
-        <div className="flex items-center justify-between px-3 pt-4 pb-2">
-          {!collapsed && (
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#CBD5E1]"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              返回列表
-            </button>
-          )}
+        {/* Collapse Header */}
+        <div className="flex items-center justify-end px-3 pt-4 pb-2">
           <button
             onClick={() => setCollapsed(!collapsed)}
             className={cn(

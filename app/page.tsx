@@ -5,19 +5,21 @@ import { AppTopbar, type TopNavKey } from "@/components/app-topbar"
 import { ProjectsGrid } from "@/components/pages/projects-grid"
 import { StrategiesGrid } from "@/components/pages/strategies-grid"
 import { ProjectDetail } from "@/components/pages/project-detail"
+import { StrategyDetail } from "@/components/pages/strategy-detail"
 
 type ViewState =
   | { type: "projects" }
   | { type: "strategies" }
   | { type: "project-detail"; projectId: string }
+  | { type: "strategy-detail"; strategyId: string }
 
 export default function Page() {
   const [view, setView] = useState<ViewState>({ type: "projects" })
 
   const activeNav: TopNavKey | null =
-    view.type === "projects"
+    view.type === "projects" || view.type === "project-detail"
       ? "projects"
-      : view.type === "strategies"
+      : view.type === "strategies" || view.type === "strategy-detail"
         ? "strategies"
         : null
 
@@ -33,8 +35,8 @@ export default function Page() {
     setView({ type: "project-detail", projectId })
   }
 
-  function handleBackToProjects() {
-    setView({ type: "projects" })
+  function handleSelectStrategy(strategyId: string) {
+    setView({ type: "strategy-detail", strategyId })
   }
 
   return (
@@ -44,12 +46,14 @@ export default function Page() {
         {view.type === "projects" && (
           <ProjectsGrid onSelectProject={handleSelectProject} />
         )}
-        {view.type === "strategies" && <StrategiesGrid />}
+        {view.type === "strategies" && (
+          <StrategiesGrid onSelectStrategy={handleSelectStrategy} />
+        )}
         {view.type === "project-detail" && (
-          <ProjectDetail
-            projectId={view.projectId}
-            onBack={handleBackToProjects}
-          />
+          <ProjectDetail projectId={view.projectId} />
+        )}
+        {view.type === "strategy-detail" && (
+          <StrategyDetail strategyId={view.strategyId} />
         )}
       </main>
     </div>
