@@ -1,6 +1,6 @@
 "use client"
 
-import { Download, Eye, FileText, FileSpreadsheet, FileImage, File } from "lucide-react"
+import { Download, Eye, FileText, FileSpreadsheet, FileImage, File, FolderOpen, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -121,7 +121,35 @@ function getFormatColor(format: string) {
   }
 }
 
-export function ProjectMaterials() {
+interface ProjectMaterialsProps {
+  isNewProject?: boolean
+  project?: {
+    name?: string
+  }
+}
+
+export function ProjectMaterials({ isNewProject = false, project }: ProjectMaterialsProps) {
+  // Show empty state for new projects
+  if (isNewProject) {
+    return (
+      <div className="flex h-full items-center justify-center bg-[#F9FAFB]">
+        <div className="text-center max-w-md px-6">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#EFF6FF]">
+            <FolderOpen className="h-8 w-8 text-[#2563EB]" />
+          </div>
+          <h3 className="text-lg font-semibold text-[#111827] mb-2">暂无项目材料</h3>
+          <p className="text-sm text-[#6B7280] mb-6 leading-relaxed">
+            {project?.name ? `「${project.name}」` : "该项目"}还没有上传任何材料。点击下方按钮开始上传您的第一份项目材料。
+          </p>
+          <button className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]">
+            <Plus className="h-4 w-4" />
+            上传材料
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <ScrollArea className="h-full">
       <div className="p-8">

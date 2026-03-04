@@ -3,6 +3,7 @@
 import {
   FolderKanban,
   Briefcase,
+  GitPullRequest,
   ChevronDown,
   LogOut,
   User,
@@ -18,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export type TopNavKey = "projects" | "strategies"
+export type TopNavKey = "projects" | "strategies" | "change-requests"
 
 interface AppTopbarProps {
   activeNav: TopNavKey | null
@@ -63,6 +64,18 @@ export function AppTopbar({ activeNav, onNavigate }: AppTopbarProps) {
         >
           <Briefcase className="h-4 w-4" />
           策略列表
+        </button>
+        <button
+          onClick={() => onNavigate("change-requests")}
+          className={cn(
+            "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+            activeNav === "change-requests"
+              ? "bg-[#7C3AED] text-white"
+              : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#CBD5E1]"
+          )}
+        >
+          <GitPullRequest className="h-4 w-4" />
+          变更请求
         </button>
       </nav>
 
