@@ -137,19 +137,18 @@ export function ProjectDetail({ projectId, project }: ProjectDetailProps) {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeSubPage === "workflow" ? (
-          <Workflow onSelectPhase={setCurrentPhase} />
+          <Workflow onSelectPhase={setCurrentPhase} isNewProject={projectId.startsWith("new-project-")} />
         ) : activeSubPage === "hypotheses" ? (
           <HypothesisChecklist isNewProject={projectId.startsWith("new-project-")} project={project} />
         ) : activeSubPage === "terms" ? (
           <TermSheet isNewProject={projectId.startsWith("new-project-")} project={project} />
         ) : activeSubPage === "overview" ? (
-          <ProjectOverview project={project} />
-        ) : (
-          (() => {
-            const ActiveComponent = subPageComponents[activeSubPage]
-            return <ActiveComponent />
-          })()
-        )}
+          <ProjectOverview project={project} isNewProject={projectId.startsWith("new-project-")} />
+        ) : activeSubPage === "materials" ? (
+          <ProjectMaterials isNewProject={projectId.startsWith("new-project-")} project={project} />
+        ) : activeSubPage === "analytics" ? (
+          <DataAnalytics />
+        ) : null}
       </div>
     </div>
   )

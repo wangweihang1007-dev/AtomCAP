@@ -20,6 +20,7 @@ import {
   Send,
   Bot,
   ClipboardList,
+  GitBranch,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -273,10 +274,11 @@ const sidebarConfigs: Record<Exclude<SidebarType, null | "ai-chat">, { title: st
 /* ─── Props ──────────────────────────────────── */
 interface WorkflowProps {
   onSelectPhase?: (phaseName: string) => void
+  isNewProject?: boolean
 }
 
 /* ─── Component ──────────────────────────────── */
-export function Workflow({ onSelectPhase }: WorkflowProps) {
+export function Workflow({ onSelectPhase, isNewProject = false }: WorkflowProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Default to the latest active or last completed phase
@@ -365,6 +367,27 @@ export function Workflow({ onSelectPhase }: WorkflowProps) {
 
   // Group phases for rendering group headers
   let lastGroup = ""
+
+  // Show empty state for new projects
+  if (isNewProject) {
+    return (
+      <div className="flex h-full items-center justify-center bg-[#F9FAFB]">
+        <div className="text-center max-w-md px-6">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#EFF6FF]">
+            <GitBranch className="h-8 w-8 text-[#2563EB]" />
+          </div>
+          <h3 className="text-lg font-semibold text-[#111827] mb-2">暂无工作流</h3>
+          <p className="text-sm text-[#6B7280] mb-6 leading-relaxed">
+            这是一个新创建的项目，工作流尚未启动。点击下方按钮启动项目的第一个阶段。
+          </p>
+          <button className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]">
+            <Plus className="h-4 w-4" />
+            启动设立期 - 阶段1
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-full bg-[#F3F4F6]">
