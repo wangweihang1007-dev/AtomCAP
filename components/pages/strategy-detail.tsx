@@ -42,6 +42,20 @@ interface StrategyDetailProps {
 export function StrategyDetail({ strategyId, strategy }: StrategyDetailProps) {
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
+  const [hypothesesPrefill, setHypothesesPrefill] = useState<{ title: string; content: string; category: string } | undefined>()
+  const [termsPrefill, setTermsPrefill] = useState<{ title: string; content: string; category: string } | undefined>()
+
+  // 处理从概览页跳转到假设清单
+  const handleNavigateToHypotheses = (prefillData?: { title: string; content: string; category: string }) => {
+    setHypothesesPrefill(prefillData)
+    setActiveSubPage("hypotheses")
+  }
+
+  // 处理从概览页跳转到条款清单
+  const handleNavigateToTerms = (prefillData?: { title: string; content: string; category: string }) => {
+    setTermsPrefill(prefillData)
+    setActiveSubPage("terms")
+  }
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -101,11 +115,23 @@ export function StrategyDetail({ strategyId, strategy }: StrategyDetailProps) {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeSubPage === "overview" ? (
-          <StrategyOverview strategy={strategy} />
+          <StrategyOverview 
+            strategy={strategy} 
+            onNavigateToHypotheses={handleNavigateToHypotheses}
+            onNavigateToTerms={handleNavigateToTerms}
+          />
         ) : activeSubPage === "hypotheses" ? (
-          <StrategyHypotheses isNewStrategy={strategyId.startsWith("new-")} />
+          <StrategyHypotheses 
+            isNewStrategy={strategyId.startsWith("new-")} 
+            prefillData={hypothesesPrefill}
+            onPrefillUsed={() => setHypothesesPrefill(undefined)}
+          />
         ) : (
-          <StrategyTerms isNewStrategy={strategyId.startsWith("new-")} />
+          <StrategyTerms 
+            isNewStrategy={strategyId.startsWith("new-")} 
+            prefillData={termsPrefill}
+            onPrefillUsed={() => setTermsPrefill(undefined)}
+          />
         )}
       </div>
     </div>

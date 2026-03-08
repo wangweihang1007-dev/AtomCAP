@@ -161,12 +161,27 @@ const statusConfig = {
 /* ------------------------------------------------------------------ */
 interface StrategyTermsProps {
   isNewStrategy?: boolean
+  prefillData?: { title: string; content: string; category: string }
+  onPrefillUsed?: () => void
 }
 
-export function StrategyTerms({ isNewStrategy = false }: StrategyTermsProps) {
+export function StrategyTerms({ isNewStrategy = false, prefillData, onPrefillUsed }: StrategyTermsProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [formTitle, setFormTitle] = useState("")
+  const [formContent, setFormContent] = useState("")
+  const [formCategory, setFormCategory] = useState("")
+
+  // 处理预填数据
+  if (prefillData && !showCreateForm) {
+    setFormTitle(prefillData.title)
+    setFormContent(prefillData.content)
+    setFormCategory(prefillData.category)
+    setShowCreateForm(true)
+    onPrefillUsed?.()
+  }
 
   const filteredData = termTableData.filter((item) => {
     const query = searchQuery.toLowerCase()
@@ -194,6 +209,87 @@ export function StrategyTerms({ isNewStrategy = false }: StrategyTermsProps) {
     console.log("[v0] Delete strategy term:", id)
   }
 
+  // 创建条款表单
+  if (showCreateForm) {
+    return (
+      <div className="h-full overflow-auto bg-[#F9FAFB]">
+        <div className="mx-auto max-w-3xl px-6 py-6">
+          <button
+            onClick={() => {
+              setShowCreateForm(false)
+              setFormTitle("")
+              setFormContent("")
+              setFormCategory("")
+            }}
+            className="mb-4 inline-flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#111827] transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            返回条款清单
+          </button>
+
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-50">
+                <FileText className="h-5 w-5 text-violet-600" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-[#111827]">创建投资条款</h1>
+                <p className="text-sm text-[#6B7280]">AI已为您预填了推荐内容，您可以根据需要进行修改</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1.5">条款名称</label>
+                <Input
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  placeholder="输入条款名称"
+                  className="h-10"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1.5">条款类别</label>
+                <Input
+                  value={formCategory}
+                  onChange={(e) => setFormCategory(e.target.value)}
+                  placeholder="输入条款类别"
+                  className="h-10"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1.5">条款内容</label>
+                <textarea
+                  value={formContent}
+                  onChange={(e) => setFormContent(e.target.value)}
+                  placeholder="输入条款详细内容"
+                  rows={6}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowCreateForm(false)
+                    setFormTitle("")
+                    setFormContent("")
+                    setFormCategory("")
+                  }}
+                >
+                  取消
+                </Button>
+                <Button className="bg-[#2563EB] hover:bg-[#1D4ED8]">
+                  创建条款
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (isNewStrategy) {
     return (
       <div className="flex h-full items-center justify-center bg-[#F9FAFB]">
@@ -205,7 +301,10 @@ export function StrategyTerms({ isNewStrategy = false }: StrategyTermsProps) {
           <p className="text-sm text-[#6B7280] mb-6 leading-relaxed">
             这是一个新创建的策略，还没有添加任何条款。点击下方按钮开始创建您的第一个投资条款。
           </p>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]">
+          <button 
+            onClick={() => setShowCreateForm(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+          >
             <Plus className="h-4 w-4" />
             创建第一个条款
           </button>

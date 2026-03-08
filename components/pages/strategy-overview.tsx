@@ -1,18 +1,89 @@
 "use client"
 
+import { useState } from "react"
 import {
   Cpu,
   TrendingUp,
   Calendar,
-  Users,
   DollarSign,
   Target,
   ArrowUpRight,
   Inbox,
+  Plus,
+  Sparkles,
+  Loader2,
+  Lightbulb,
+  FileText,
+  FolderOpen,
+  ChevronRight,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { type Strategy } from "@/components/pages/strategies-grid"
+
+// AI推荐内容 - 围绕AI基础大模型
+const aiRecommendedHypotheses = [
+  {
+    id: "h1",
+    title: "大模型推理成本下降假设",
+    content: "假设未来18个月内，大模型推理成本将下降60%以上，主要驱动因素包括：模型量化技术成熟、推理芯片性能提升、以及MoE架构普及带来的计算效率提升。",
+    category: "技术趋势",
+  },
+  {
+    id: "h2", 
+    title: "多模态融合市场假设",
+    content: "假设多模态大模型（文本+图像+视频+音频）将在2025年成为主流，预计占据AI应用市场60%以上份额，核心驱动力来自企业对统一AI能力的需求。",
+    category: "市场规模",
+  },
+  {
+    id: "h3",
+    title: "开源模型生态竞争假设",
+    content: "假设开源大模型将持续缩小与闭源模型的性能差距，在特定垂直领域甚至实现超越，这将重塑行业竞争格局并降低企业AI部署门槛。",
+    category: "竞争格局",
+  },
+]
+
+const aiRecommendedTerms = [
+  {
+    id: "t1",
+    title: "技术里程碑对赌条款",
+    content: "约定目标公司需在投资后12个月内完成自研大模型发布，模型参数规模不低于100B，在公开评测集上达到行业前三水平，否则触发估值调整机制。",
+    category: "里程碑",
+  },
+  {
+    id: "t2",
+    title: "算力成本锁定条款",
+    content: "要求目标公司与主要云服务商签订不少于24个月的算力采购协议，锁定GPU租赁价格，确保训练成本可控，并在条款中约定成本超支时的处理机制。",
+    category: "成本控制",
+  },
+  {
+    id: "t3",
+    title: "核心团队绑定条款",
+    content: "关键技术人员（CTO、首席科学家、核心算法负责人）需签订不少于4年的服务协议，离职需提前6个月通知并完成知识交接，违约金不低于年薪的200%。",
+    category: "团队稳定",
+  },
+]
+
+const aiRecommendedMaterials = [
+  {
+    id: "m1",
+    title: "模型评测报告",
+    content: "收集目标公司大模型在主流评测基准（MMLU、HumanEval、GSM8K等）上的表现数据，与GPT-4、Claude等头部模型进行横向对比分析。",
+    category: "技术评估",
+  },
+  {
+    id: "m2",
+    title: "算力资源规划书",
+    content: "获取目标公司未来24个月的算力需求规划，包括GPU集群规模、云服务商选择、自建机房计划、以及预计的算力成本支出明细。",
+    category: "资源规划",
+  },
+  {
+    id: "m3",
+    title: "商业化落地案例",
+    content: "收集目标公司已签约的标杆客户案例，包括合同金额、部署方式、客户反馈、续约情况等，重点关注AI能力的实际商业价值转化。",
+    category: "商业验证",
+  },
+]
 
 // Default strategy info for existing strategies (fallback)
 const defaultStrategyInfo = {
@@ -99,9 +170,45 @@ const investFocus = [
 
 interface StrategyOverviewProps {
   strategy?: Strategy
+  onNavigateToHypotheses?: (prefillData?: { title: string; content: string; category: string }) => void
+  onNavigateToTerms?: (prefillData?: { title: string; content: string; category: string }) => void
 }
 
-export function StrategyOverview({ strategy }: StrategyOverviewProps) {
+export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateToTerms }: StrategyOverviewProps) {
+  // AI推荐生成状态
+  const [hypothesesGenerated, setHypothesesGenerated] = useState(false)
+  const [hypothesesLoading, setHypothesesLoading] = useState(false)
+  const [termsGenerated, setTermsGenerated] = useState(false)
+  const [termsLoading, setTermsLoading] = useState(false)
+  const [materialsGenerated, setMaterialsGenerated] = useState(false)
+  const [materialsLoading, setMaterialsLoading] = useState(false)
+
+  // 生成推荐假设
+  const handleGenerateHypotheses = () => {
+    setHypothesesLoading(true)
+    setTimeout(() => {
+      setHypothesesLoading(false)
+      setHypothesesGenerated(true)
+    }, 1500)
+  }
+
+  // 生成推荐条款
+  const handleGenerateTerms = () => {
+    setTermsLoading(true)
+    setTimeout(() => {
+      setTermsLoading(false)
+      setTermsGenerated(true)
+    }, 1500)
+  }
+
+  // 生成推荐材料
+  const handleGenerateMaterials = () => {
+    setMaterialsLoading(true)
+    setTimeout(() => {
+      setMaterialsLoading(false)
+      setMaterialsGenerated(true)
+    }, 1500)
+  }
   // If strategy is provided (new strategy), use its data
   // Otherwise use default strategy info
   const isNewStrategy = strategy && strategy.id.startsWith("new-")
@@ -216,7 +323,13 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
 
         {/* Investment Focus */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-6">
-          <h3 className="text-base font-semibold text-[#111827] mb-4">投资重点领域</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold text-[#111827]">投资重点领域</h3>
+            <button className="flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]">
+              <Plus className="h-3.5 w-3.5" />
+              添加领域
+            </button>
+          </div>
           {isNewStrategy ? (
             <div className="flex flex-col items-center justify-center py-8 text-[#9CA3AF]">
               <Inbox className="h-10 w-10 mb-2" />
@@ -246,6 +359,165 @@ export function StrategyOverview({ strategy }: StrategyOverviewProps) {
               ))}
             </div>
           )}
+        </div>
+
+        {/* AI推荐卡片区域 */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* 推荐假设 */}
+          <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50">
+                <Lightbulb className="h-4 w-4 text-amber-600" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#111827]">推荐假设</h3>
+            </div>
+            
+            {!hypothesesGenerated && !hypothesesLoading ? (
+              <div className="flex flex-col items-center justify-center py-6 text-[#9CA3AF]">
+                <Sparkles className="h-8 w-8 mb-2 text-[#D1D5DB]" />
+                <p className="text-xs text-center mb-3">AI将基于策略特点生成投资假设建议</p>
+                <button
+                  onClick={handleGenerateHypotheses}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  生成推荐
+                </button>
+              </div>
+            ) : hypothesesLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-[#2563EB] mb-2" />
+                <p className="text-xs text-[#6B7280]">AI正在分析策略特点...</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-[#6B7280] bg-blue-50 rounded-lg p-2 border border-blue-100">
+                  基于AI基础大模型赛道分析，建议关注以下投资假设：
+                </p>
+                {aiRecommendedHypotheses.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-[#E5E7EB] p-3 bg-[#F9FAFB]">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-xs font-medium text-[#111827]">{item.title}</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] px-1.5 py-0">
+                        {item.category}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#6B7280] leading-relaxed line-clamp-2 mb-2">{item.content}</p>
+                    <button
+                      onClick={() => onNavigateToHypotheses?.({ title: item.title, content: item.content, category: item.category })}
+                      className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]"
+                    >
+                      创建此假设
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 推荐条款 */}
+          <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50">
+                <FileText className="h-4 w-4 text-violet-600" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#111827]">推荐条款</h3>
+            </div>
+            
+            {!termsGenerated && !termsLoading ? (
+              <div className="flex flex-col items-center justify-center py-6 text-[#9CA3AF]">
+                <Sparkles className="h-8 w-8 mb-2 text-[#D1D5DB]" />
+                <p className="text-xs text-center mb-3">AI将基于策略特点生成条款建议</p>
+                <button
+                  onClick={handleGenerateTerms}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  生成推荐
+                </button>
+              </div>
+            ) : termsLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-[#2563EB] mb-2" />
+                <p className="text-xs text-[#6B7280]">AI正在分析投资条款...</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-[#6B7280] bg-violet-50 rounded-lg p-2 border border-violet-100">
+                  针对大模型投资的特殊风险，建议设置以下条款：
+                </p>
+                {aiRecommendedTerms.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-[#E5E7EB] p-3 bg-[#F9FAFB]">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-xs font-medium text-[#111827]">{item.title}</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] px-1.5 py-0">
+                        {item.category}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#6B7280] leading-relaxed line-clamp-2 mb-2">{item.content}</p>
+                    <button
+                      onClick={() => onNavigateToTerms?.({ title: item.title, content: item.content, category: item.category })}
+                      className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]"
+                    >
+                      创建此条款
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 推荐项目材料 */}
+          <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
+                <FolderOpen className="h-4 w-4 text-emerald-600" />
+              </div>
+              <h3 className="text-sm font-semibold text-[#111827]">推荐项目材料</h3>
+            </div>
+            
+            {!materialsGenerated && !materialsLoading ? (
+              <div className="flex flex-col items-center justify-center py-6 text-[#9CA3AF]">
+                <Sparkles className="h-8 w-8 mb-2 text-[#D1D5DB]" />
+                <p className="text-xs text-center mb-3">AI将推荐需收集的尽调材料</p>
+                <button
+                  onClick={handleGenerateMaterials}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  生成推荐
+                </button>
+              </div>
+            ) : materialsLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-[#2563EB] mb-2" />
+                <p className="text-xs text-[#6B7280]">AI正在分析尽调需求...</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-[#6B7280] bg-emerald-50 rounded-lg p-2 border border-emerald-100">
+                  大模型项目尽调建议重点收集以下材料：
+                </p>
+                {aiRecommendedMaterials.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-[#E5E7EB] p-3 bg-[#F9FAFB]">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-xs font-medium text-[#111827]">{item.title}</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] px-1.5 py-0">
+                        {item.category}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#6B7280] leading-relaxed line-clamp-2 mb-2">{item.content}</p>
+                    <button className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]">
+                      上传此材料
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Applied Projects */}
