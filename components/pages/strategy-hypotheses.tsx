@@ -125,9 +125,20 @@ interface StrategyHypothesesProps {
   isNewStrategy?: boolean
   prefillData?: { title: string; content: string; category: string }
   onPrefillUsed?: () => void
+  strategyType?: "主题策略" | "赛道策略"
+  parentStrategyName?: string
 }
 
-export function StrategyHypotheses({ isNewStrategy = false, prefillData, onPrefillUsed }: StrategyHypothesesProps) {
+export function StrategyHypotheses({ 
+  isNewStrategy = false, 
+  prefillData, 
+  onPrefillUsed,
+  strategyType,
+  parentStrategyName,
+}: StrategyHypothesesProps) {
+  // 赛道策略从主题策略继承数据
+  const isTrackStrategy = strategyType === "赛道策略"
+  const inheritedFromParent = isTrackStrategy && isNewStrategy && parentStrategyName
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
@@ -252,7 +263,8 @@ export function StrategyHypotheses({ isNewStrategy = false, prefillData, onPrefi
     )
   }
 
-  if (isNewStrategy) {
+  // 新建的主题策略显示空状态
+  if (isNewStrategy && !inheritedFromParent) {
     return (
       <div className="flex h-full items-center justify-center bg-[#F9FAFB]">
         <div className="text-center max-w-md px-6">
@@ -314,6 +326,18 @@ export function StrategyHypotheses({ isNewStrategy = false, prefillData, onPrefi
   return (
     <div className="h-full overflow-auto bg-[#F9FAFB]">
       <div className="mx-auto max-w-7xl px-6 py-6">
+        {/* 赛道策略继承提示 */}
+        {inheritedFromParent && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
+              <Lightbulb className="h-3.5 w-3.5 text-blue-600" />
+            </div>
+            <p className="text-sm text-blue-700">
+              当前赛道策略的假设清单已从主题策略「{parentStrategyName}」继承，您可以在此基础上进行调整
+            </p>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-[#111827]">假设清单</h1>

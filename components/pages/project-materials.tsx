@@ -126,20 +126,31 @@ interface ProjectMaterialsProps {
   project?: {
     name?: string
   }
+  strategyType?: "主题策略" | "赛道策略"
+  parentStrategyName?: string
 }
 
-export function ProjectMaterials({ isNewProject = false, project }: ProjectMaterialsProps) {
-  // Show empty state for new projects
-  if (isNewProject) {
+export function ProjectMaterials({ 
+  isNewProject = false, 
+  project,
+  strategyType,
+  parentStrategyName,
+}: ProjectMaterialsProps) {
+  // 赛道策略从主题策略继承数据
+  const isTrackStrategy = strategyType === "赛道策略"
+  const inheritedFromParent = isTrackStrategy && isNewProject && parentStrategyName
+
+  // 新建的主题策略显示空状态
+  if (isNewProject && !inheritedFromParent) {
     return (
       <div className="flex h-full items-center justify-center bg-[#F9FAFB]">
         <div className="text-center max-w-md px-6">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#EFF6FF]">
             <FolderOpen className="h-8 w-8 text-[#2563EB]" />
           </div>
-          <h3 className="text-lg font-semibold text-[#111827] mb-2">暂无项目材料</h3>
+          <h3 className="text-lg font-semibold text-[#111827] mb-2">暂无通用材料</h3>
           <p className="text-sm text-[#6B7280] mb-6 leading-relaxed">
-            {project?.name ? `「${project.name}」` : "该项目"}还没有上传任何材料。点击下方按钮开始上传您的第一份项目材料。
+            {project?.name ? `「${project.name}」` : "该策略"}还没有上传任何材料。点击下方按钮开始上传您的第一份材料。
           </p>
           <button className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]">
             <Plus className="h-4 w-4" />
@@ -153,6 +164,18 @@ export function ProjectMaterials({ isNewProject = false, project }: ProjectMater
   return (
     <ScrollArea className="h-full">
       <div className="p-8">
+        {/* 赛道策略继承提示 */}
+        {inheritedFromParent && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100">
+              <FolderOpen className="h-3.5 w-3.5 text-emerald-600" />
+            </div>
+            <p className="text-sm text-emerald-700">
+              当前赛道策略的通用材料已从主题策略「{parentStrategyName}」继承，您可以在此基础上进行调整
+            </p>
+          </div>
+        )}
+        
         <h1 className="text-2xl font-bold text-[#111827]">通用材料</h1>
         <p className="mt-1 text-sm text-[#6B7280]">
           {project?.name ? `${project.name} - ` : ""}行业通用材料与文件管理

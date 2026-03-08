@@ -122,17 +122,23 @@ export function StrategyDetail({ strategyId, strategy }: StrategyDetailProps) {
             isNewStrategy={strategyId.startsWith("new-")}
             prefillData={hypothesesPrefill}
             onPrefillUsed={() => setHypothesesPrefill(undefined)}
+            strategyType={strategy?.type}
+            parentStrategyName={strategy?.parentStrategyName}
           />
         ) : activeSubPage === "terms" ? (
           <StrategyTerms
             isNewStrategy={strategyId.startsWith("new-")}
             prefillData={termsPrefill}
             onPrefillUsed={() => setTermsPrefill(undefined)}
+            strategyType={strategy?.type}
+            parentStrategyName={strategy?.parentStrategyName}
           />
         ) : (
           <ProjectMaterials
             isNewProject={strategyId.startsWith("new-")}
             project={{ name: strategy?.name }}
+            strategyType={strategy?.type}
+            parentStrategyName={strategy?.parentStrategyName}
           />
         )}
       </div>

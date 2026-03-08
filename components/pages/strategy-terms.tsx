@@ -144,9 +144,20 @@ interface StrategyTermsProps {
   isNewStrategy?: boolean
   prefillData?: { title: string; content: string; category: string }
   onPrefillUsed?: () => void
+  strategyType?: "主题策略" | "赛道策略"
+  parentStrategyName?: string
 }
 
-export function StrategyTerms({ isNewStrategy = false, prefillData, onPrefillUsed }: StrategyTermsProps) {
+export function StrategyTerms({ 
+  isNewStrategy = false, 
+  prefillData, 
+  onPrefillUsed,
+  strategyType,
+  parentStrategyName,
+}: StrategyTermsProps) {
+  // 赛道策略从主题策略继承数据
+  const isTrackStrategy = strategyType === "赛道策略"
+  const inheritedFromParent = isTrackStrategy && isNewStrategy && parentStrategyName
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
@@ -225,7 +236,7 @@ export function StrategyTerms({ isNewStrategy = false, prefillData, onPrefillUse
                 <Input
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="输入条款名称"
+                  placeholder="输入条款名��"
                   className="h-10"
                 />
               </div>
@@ -271,7 +282,8 @@ export function StrategyTerms({ isNewStrategy = false, prefillData, onPrefillUse
     )
   }
 
-  if (isNewStrategy) {
+  // 新建的主题策略显示空状态
+  if (isNewStrategy && !inheritedFromParent) {
     return (
       <div className="flex h-full items-center justify-center bg-[#F9FAFB]">
         <div className="text-center max-w-md px-6">
@@ -350,6 +362,18 @@ export function StrategyTerms({ isNewStrategy = false, prefillData, onPrefillUse
   return (
     <div className="h-full overflow-auto bg-[#F9FAFB]">
       <div className="mx-auto max-w-7xl px-6 py-6">
+        {/* 赛道策略继承提示 */}
+        {inheritedFromParent && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg bg-violet-50 border border-violet-200 px-4 py-3">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-100">
+              <FileText className="h-3.5 w-3.5 text-violet-600" />
+            </div>
+            <p className="text-sm text-violet-700">
+              当前赛道策略的条款清单已从主题策略「{parentStrategyName}」继承，您可以在此基础上进行调整
+            </p>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-[#111827]">条款清单</h1>
