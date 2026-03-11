@@ -4,12 +4,15 @@ import { useState } from "react"
 import { AppTopbar, type TopNavKey } from "@/components/app-topbar"
 import { Dashboard } from "@/components/pages/dashboard"
 import { ProjectsGrid, type Project, type PendingProject, initialProjects } from "@/components/pages/projects-grid"
-import { StrategiesGrid, type Strategy, type PendingStrategy, type StrategyHypothesis, type PendingHypothesis, initialStrategies } from "@/components/pages/strategies-grid"
+import { StrategiesGrid, type Strategy, type PendingStrategy, type StrategyHypothesis, type PendingHypothesis, type StrategyTerm, type PendingTerm, type StrategyMaterial, type PendingMaterial, initialStrategies } from "@/components/pages/strategies-grid"
 import { ProjectDetail } from "@/components/pages/project-detail"
 import { StrategyDetail } from "@/components/pages/strategy-detail"
 import { ChangeRequests } from "@/components/pages/change-requests"
 import { Login } from "@/components/pages/login"
 import type { Phase, PendingPhase } from "@/components/pages/workflow"
+import { type HypothesisTableItem, getTemplateHypothesesForStrategy } from "@/components/pages/hypothesis-checklist"
+import { type TermTableItem, getTemplateTermsForStrategy } from "@/components/pages/term-sheet"
+import { getTemplateMaterialsForStrategy } from "@/components/pages/project-materials"
 
 type ViewState =
   | { type: "login" }
@@ -18,7 +21,7 @@ type ViewState =
   | { type: "strategies" }
   | { type: "change-requests" }
   | { type: "project-detail"; projectId: string }
-  | { type: "strategy-detail"; strategyId: string }
+  | { type: "strategy-detail"; strategyId: string; initialSubPage?: "overview" | "hypotheses" | "terms" | "materials" }
 
 export default function Page() {
   const [view, setView] = useState<ViewState>({ type: "login" })
@@ -32,6 +35,20 @@ export default function Page() {
   // Strategy hypotheses state - keyed by strategyId
   const [strategyHypotheses, setStrategyHypotheses] = useState<Record<string, StrategyHypothesis[]>>({})
   const [pendingHypotheses, setPendingHypotheses] = useState<PendingHypothesis[]>([])
+  // Strategy terms state - keyed by strategyId
+  const [strategyTerms, setStrategyTerms] = useState<Record<string, StrategyTerm[]>>({})
+  const [pendingTerms, setPendingTerms] = useState<PendingTerm[]>([])
+  // Strategy materials state - keyed by strategyId
+  const [strategyMaterials, setStrategyMaterials] = useState<Record<string, StrategyMaterial[]>>({})
+  const [pendingMaterials, setPendingMaterials] = useState<PendingMaterial[]>([])
+  // Project-level inherited data - keyed by projectId, initialized when project is approved
+  const [projectHypotheses, setProjectHypotheses] = useState<Record<string, HypothesisTableItem[]>>({})
+  const [projectTerms, setProjectTerms] = useState<Record<string, TermTableItem[]>>({})
+  const [projectMaterialsMap, setProjectMaterialsMap] = useState<Record<string, StrategyMaterial[]>>({})
+  // Strategy AI recommendation generated flags - keyed by strategyId, persists for the session
+  const [strategyRecommendations, setStrategyRecommendations] = useState<
+    Record<string, { hypothesesGenerated: boolean; termsGenerated: boolean; materialsGenerated: boolean }>
+  >({})
 
   const activeNav: TopNavKey | null =
     view.type === "dashboard"
@@ -99,12 +116,66 @@ export default function Page() {
   function handleApproveProject(id: string) {
     const pending = pendingProjects.find((p) => p.id === id)
     if (pending) {
+      const newProjectId = `new-project-${Date.now()}`
       const newProject: Project = {
-        id: `new-project-${Date.now()}`,
+        id: newProjectId,
         ...pending.project,
       }
       setProjects([newProject, ...projects])
       setPendingProjects(pendingProjects.filter((p) => p.id !== id))
+
+      // Inherit hypotheses from strategy template (all set to "待验证")
+      const sid = pending.project.strategyId || ""
+      const today = new Date().toISOString().split("T")[0]
+      const templateHypotheses = getTemplateHypothesesForStrategy(sid)
+      const userHypotheses: HypothesisTableItem[] = (strategyHypotheses[sid] || []).map((h, i) => ({
+        id: `proj-h-${Date.now()}-${i}`,
+        direction: h.direction,
+        category: h.category,
+        name: h.name,
+        owner: h.owner,
+        createdAt: h.createdAt,
+        updatedAt: today,
+        status: "pending" as const,
+      }))
+      setProjectHypotheses((prev) => ({
+        ...prev,
+        [newProjectId]: [...templateHypotheses, ...userHypotheses],
+      }))
+
+      // Inherit terms from strategy template (all set to "待审批")
+      const templateTerms = getTemplateTermsForStrategy(sid)
+      const userTerms: TermTableItem[] = (strategyTerms[sid] || []).map((t, i) => ({
+        id: `proj-t-${Date.now()}-${i}`,
+        direction: t.direction,
+        category: t.category,
+        name: t.name,
+        owner: t.owner,
+        createdAt: t.createdAt,
+        updatedAt: today,
+        status: "pending" as const,
+      }))
+      setProjectTerms((prev) => ({
+        ...prev,
+        [newProjectId]: [...templateTerms, ...userTerms],
+      }))
+
+      // Inherit materials: template mock materials + user-approved strategy materials
+      const templateMaterials: StrategyMaterial[] = getTemplateMaterialsForStrategy(sid).map((m) => ({
+        ...m,
+        strategyId: sid,
+        category: "",
+        owner: "张伟",
+        createdAt: today,
+      }))
+      const inheritedMaterials: StrategyMaterial[] = [
+        ...(strategyMaterials[sid] || []),
+        ...templateMaterials,
+      ]
+      setProjectMaterialsMap((prev) => ({
+        ...prev,
+        [newProjectId]: inheritedMaterials,
+      }))
     }
   }
 
@@ -179,9 +250,92 @@ export default function Page() {
     setPendingHypotheses(pendingHypotheses.filter((p) => p.id !== id))
   }
 
+  // Term change request handlers
+  function handleCreatePendingTerm(pending: PendingTerm) {
+    setPendingTerms([pending, ...pendingTerms])
+    setView({ type: "change-requests" })
+  }
+
+  function handleApproveTerm(id: string) {
+    const pending = pendingTerms.find((p) => p.id === id)
+    if (pending) {
+      const { strategyId } = pending.term
+      const newTerm: StrategyTerm = {
+        id: `term-${Date.now()}`,
+        ...pending.term,
+      }
+      const currentTerms = strategyTerms[strategyId] || []
+      setStrategyTerms({
+        ...strategyTerms,
+        [strategyId]: [newTerm, ...currentTerms],
+      })
+      setPendingTerms(pendingTerms.filter((p) => p.id !== id))
+    }
+  }
+
+  function handleRejectTerm(id: string) {
+    setPendingTerms(pendingTerms.filter((p) => p.id !== id))
+  }
+
+  // Material change request handlers
+  function handleCreatePendingMaterial(pending: PendingMaterial) {
+    setPendingMaterials([pending, ...pendingMaterials])
+    setView({ type: "change-requests" })
+  }
+
+  function handleApproveMaterial(id: string) {
+    const pending = pendingMaterials.find((p) => p.id === id)
+    if (pending) {
+      const newMaterials: StrategyMaterial[] = pending.files.map((file, i) => ({
+        id: `material-${Date.now()}-${i}`,
+        strategyId: pending.strategyId,
+        name: file.name,
+        format: file.format,
+        size: file.size,
+        description: pending.description,
+        category: pending.category,
+        owner: "张伟",
+        createdAt: new Date().toISOString().split("T")[0],
+      }))
+      const current = strategyMaterials[pending.strategyId] || []
+      setStrategyMaterials({
+        ...strategyMaterials,
+        [pending.strategyId]: [...newMaterials, ...current],
+      })
+      setPendingMaterials(pendingMaterials.filter((p) => p.id !== id))
+      // Navigate back to the strategy's 通用材料 page
+      setView({ type: "strategy-detail", strategyId: pending.strategyId, initialSubPage: "materials" })
+    }
+  }
+
+  function handleRejectMaterial(id: string) {
+    setPendingMaterials(pendingMaterials.filter((p) => p.id !== id))
+  }
+
+  // Strategy recommendation flag handlers
+  function handleSetStrategyRecommendation(
+    strategyId: string,
+    update: Partial<{ hypothesesGenerated: boolean; termsGenerated: boolean; materialsGenerated: boolean }>
+  ) {
+    setStrategyRecommendations((prev) => {
+      const current = prev[strategyId] ?? { hypothesesGenerated: false, termsGenerated: false, materialsGenerated: false }
+      return { ...prev, [strategyId]: { ...current, ...update } }
+    })
+  }
+
   // Helper to get hypotheses for a strategy
   function getHypothesesForStrategy(strategyId: string): StrategyHypothesis[] {
     return strategyHypotheses[strategyId] || []
+  }
+
+  // Helper to get terms for a strategy
+  function getTermsForStrategy(strategyId: string): StrategyTerm[] {
+    return strategyTerms[strategyId] || []
+  }
+
+  // Helper to get materials for a strategy
+  function getMaterialsForStrategy(strategyId: string): StrategyMaterial[] {
+    return strategyMaterials[strategyId] || []
   }
 
   // Helper to get phases for a project
@@ -229,6 +383,8 @@ export default function Page() {
             pendingProjects={pendingProjects}
             pendingPhases={pendingPhases}
             pendingHypotheses={pendingHypotheses}
+            pendingTerms={pendingTerms}
+            pendingMaterials={pendingMaterials}
             onApproveStrategy={handleApproveStrategy}
             onRejectStrategy={handleRejectStrategy}
             onApproveProject={handleApproveProject}
@@ -237,23 +393,37 @@ export default function Page() {
             onRejectPhase={handleRejectPhase}
             onApproveHypothesis={handleApproveHypothesis}
             onRejectHypothesis={handleRejectHypothesis}
+            onApproveTerm={handleApproveTerm}
+            onRejectTerm={handleRejectTerm}
+            onApproveMaterial={handleApproveMaterial}
+            onRejectMaterial={handleRejectMaterial}
           />
         )}
         {view.type === "project-detail" && (
-          <ProjectDetail 
+          <ProjectDetail
             projectId={view.projectId}
             project={projects.find((p) => p.id === view.projectId)}
             phases={getPhasesForProject(view.projectId)}
             onPhasesChange={(phases) => updatePhasesForProject(view.projectId, phases)}
             onCreatePendingPhase={handleCreatePendingPhase}
+            projectHypotheses={projectHypotheses[view.projectId]}
+            projectTerms={projectTerms[view.projectId]}
+            projectMaterials={projectMaterialsMap[view.projectId]}
           />
         )}
         {view.type === "strategy-detail" && (
-          <StrategyDetail 
-            strategyId={view.strategyId} 
+          <StrategyDetail
+            strategyId={view.strategyId}
             strategy={strategies.find((s) => s.id === view.strategyId)}
+            initialSubPage={view.initialSubPage}
             hypotheses={getHypothesesForStrategy(view.strategyId)}
             onCreatePendingHypothesis={handleCreatePendingHypothesis}
+            strategyTerms={getTermsForStrategy(view.strategyId)}
+            onCreatePendingTerm={handleCreatePendingTerm}
+            strategyMaterials={getMaterialsForStrategy(view.strategyId)}
+            onCreatePendingMaterial={handleCreatePendingMaterial}
+            recommendations={strategyRecommendations[view.strategyId] || { hypothesesGenerated: false, termsGenerated: false, materialsGenerated: false }}
+            onSetRecommendation={(update) => handleSetStrategyRecommendation(view.strategyId, update)}
           />
         )}
       </main>

@@ -14,7 +14,8 @@ import { StrategyOverview } from "@/components/pages/strategy-overview"
 import { StrategyHypotheses } from "@/components/pages/strategy-hypotheses"
 import { StrategyTerms } from "@/components/pages/strategy-terms"
 import { ProjectMaterials } from "@/components/pages/project-materials"
-import { type Strategy, type StrategyHypothesis, type PendingHypothesis } from "@/components/pages/strategies-grid"
+import { type Strategy, type StrategyHypothesis, type PendingHypothesis, type StrategyTerm, type PendingTerm, type StrategyMaterial, type PendingMaterial } from "@/components/pages/strategies-grid"
+import type { MaterialPrefillData } from "@/components/pages/strategy-overview"
 
 type SubPageKey = "overview" | "hypotheses" | "terms" | "materials"
 
@@ -34,13 +35,36 @@ const subNavItems: SubNavItem[] = [
 interface StrategyDetailProps {
   strategyId: string
   strategy?: Strategy
+  initialSubPage?: SubPageKey
   hypotheses: StrategyHypothesis[]
   onCreatePendingHypothesis: (pending: PendingHypothesis) => void
+  strategyTerms: StrategyTerm[]
+  onCreatePendingTerm: (pending: PendingTerm) => void
+  strategyMaterials: StrategyMaterial[]
+  onCreatePendingMaterial: (pending: PendingMaterial) => void
+  recommendations: { hypothesesGenerated: boolean; termsGenerated: boolean; materialsGenerated: boolean }
+  onSetRecommendation: (update: Partial<{ hypothesesGenerated: boolean; termsGenerated: boolean; materialsGenerated: boolean }>) => void
 }
 
-export function StrategyDetail({ strategyId, strategy, hypotheses, onCreatePendingHypothesis }: StrategyDetailProps) {
-  const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
+export function StrategyDetail({
+  strategyId,
+  strategy,
+  initialSubPage,
+  hypotheses,
+  onCreatePendingHypothesis,
+  strategyTerms,
+  onCreatePendingTerm,
+  strategyMaterials,
+  onCreatePendingMaterial,
+  recommendations,
+  onSetRecommendation,
+}: StrategyDetailProps) {
+  const [activeSubPage, setActiveSubPage] = useState<SubPageKey>(initialSubPage || "overview")
   const [collapsed, setCollapsed] = useState(false)
+
+  // AI推荐生成状态从 app/page.tsx 通过 props 传入，整个会话中持久化
+  const { hypothesesGenerated, termsGenerated, materialsGenerated } = recommendations
+
   const [hypothesesPrefill, setHypothesesPrefill] = useState<{
     title: string
     direction: string
@@ -49,7 +73,16 @@ export function StrategyDetail({ strategyId, strategy, hypotheses, onCreatePendi
     reason: string
     relatedMaterials: string[]
   } | undefined>()
-  const [termsPrefill, setTermsPrefill] = useState<{ title: string; content: string; category: string } | undefined>()
+  const [termsPrefill, setTermsPrefill] = useState<{
+    title: string
+    direction: string
+    category: string
+    content: string
+    relatedMaterials: string[]
+    relatedHypotheses: { id: string; direction: string; category: string; name: string }[]
+  } | undefined>()
+
+  const [materialsPrefill, setMaterialsPrefill] = useState<MaterialPrefillData | undefined>()
 
   // 处理从概览页跳转到假设清单
   const handleNavigateToHypotheses = (prefillData?: {
@@ -65,9 +98,22 @@ export function StrategyDetail({ strategyId, strategy, hypotheses, onCreatePendi
   }
 
   // 处理从概览页跳转到条款清单
-  const handleNavigateToTerms = (prefillData?: { title: string; content: string; category: string }) => {
+  const handleNavigateToTerms = (prefillData?: {
+    title: string
+    direction: string
+    category: string
+    content: string
+    relatedMaterials: string[]
+    relatedHypotheses: { id: string; direction: string; category: string; name: string }[]
+  }) => {
     setTermsPrefill(prefillData)
     setActiveSubPage("terms")
+  }
+
+  // 处理从概览页跳转到通用材料
+  const handleNavigateToMaterials = (prefillData?: MaterialPrefillData) => {
+    setMaterialsPrefill(prefillData)
+    setActiveSubPage("materials")
   }
 
   return (
@@ -132,6 +178,13 @@ export function StrategyDetail({ strategyId, strategy, hypotheses, onCreatePendi
             strategy={strategy}
             onNavigateToHypotheses={handleNavigateToHypotheses}
             onNavigateToTerms={handleNavigateToTerms}
+            onNavigateToMaterials={handleNavigateToMaterials}
+            hypothesesGenerated={hypothesesGenerated}
+            onSetHypothesesGenerated={(v) => onSetRecommendation({ hypothesesGenerated: v })}
+            termsGenerated={termsGenerated}
+            onSetTermsGenerated={(v) => onSetRecommendation({ termsGenerated: v })}
+            materialsGenerated={materialsGenerated}
+            onSetMaterialsGenerated={(v) => onSetRecommendation({ materialsGenerated: v })}
           />
         ) : activeSubPage === "hypotheses" ? (
           <StrategyHypotheses
@@ -146,11 +199,14 @@ export function StrategyDetail({ strategyId, strategy, hypotheses, onCreatePendi
           />
         ) : activeSubPage === "terms" ? (
           <StrategyTerms
+            strategyId={strategyId}
             isNewStrategy={strategyId.startsWith("new-")}
             prefillData={termsPrefill}
             onPrefillUsed={() => setTermsPrefill(undefined)}
             strategyType={strategy?.type}
             parentStrategyName={strategy?.parentStrategyName}
+            strategyTerms={strategyTerms}
+            onCreatePendingTerm={onCreatePendingTerm}
           />
         ) : (
           <ProjectMaterials
@@ -158,6 +214,11 @@ export function StrategyDetail({ strategyId, strategy, hypotheses, onCreatePendi
             project={{ name: strategy?.name }}
             strategyType={strategy?.type}
             parentStrategyName={strategy?.parentStrategyName}
+            strategyId={strategyId}
+            strategyMaterials={strategyMaterials}
+            onCreatePendingMaterial={onCreatePendingMaterial}
+            materialPrefill={materialsPrefill}
+            onMaterialPrefillUsed={() => setMaterialsPrefill(undefined)}
           />
         )}
       </div>

@@ -12,6 +12,9 @@ import {
   X,
   FileText,
   Link2,
+  FolderOpen,
+  Sheet,
+  File,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -56,6 +59,7 @@ interface HypothesisDetail {
   createdAt: string
   updatedAt: string
   recommendation: string
+  relatedMaterials: string[]
 }
 
 /* ------------------------------------------------------------------ */
@@ -127,6 +131,7 @@ const hypothesisDetails: Record<string, HypothesisDetail> = {
     createdAt: "2024-01-10",
     updatedAt: "2024-02-15",
     recommendation: "国产芯片替代路径正在加速验证，叠加国产化政策红利与供应链安全诉求，下游采购意愿持续提升。当前市场窗口期是布局核心标的的关键时机，该假设若得到验证，将为策略在算力芯片赛道的选标逻辑提供重要支撑，建议重点关注推理芯片性价比领先的国内厂商。",
+    relatedMaterials: ["m1", "m4", "m5"],
   },
   "h2": {
     id: "h2",
@@ -136,6 +141,7 @@ const hypothesisDetails: Record<string, HypothesisDetail> = {
     createdAt: "2024-01-12",
     updatedAt: "2024-02-18",
     recommendation: "云端AI算力的结构性增长已获头部科技公司资本开支数据的明确印证，市场规模上限清晰。该假设已验证，可作为策略整体投资逻辑的宏观需求锚点，为算力赛道的标的估值提供市场容量背书，增强投资决策的确定性。",
+    relatedMaterials: ["m2", "m5", "m7"],
   },
 }
 
@@ -314,6 +320,21 @@ export function StrategyHypotheses({
   }
 
   if (showDetail && selectedDetail) {
+    const linkedMaterials = availableMaterials.filter((m) =>
+      selectedDetail.relatedMaterials.includes(m.id)
+    )
+
+    const formatIcon = (fmt: string) => {
+      if (fmt === "XLSX") return <Sheet className="h-4 w-4 text-emerald-600" />
+      if (fmt === "DOCX") return <FileText className="h-4 w-4 text-blue-600" />
+      return <File className="h-4 w-4 text-rose-500" />
+    }
+    const formatBadgeClass = (fmt: string) => {
+      if (fmt === "XLSX") return "bg-emerald-50 text-emerald-700 border-emerald-200"
+      if (fmt === "DOCX") return "bg-blue-50 text-blue-700 border-blue-200"
+      return "bg-rose-50 text-rose-700 border-rose-200"
+    }
+
     return (
       <div className="h-full overflow-auto bg-[#F9FAFB]">
         <div className="mx-auto max-w-5xl px-6 py-6">
@@ -325,7 +346,7 @@ export function StrategyHypotheses({
             返回假设清单
           </button>
 
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 mb-6">
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 mb-4">
             <h1 className="text-xl font-bold text-[#111827] mb-4">{selectedDetail.title}</h1>
             <p className="text-sm text-[#6B7280] mb-4">{selectedDetail.description}</p>
             <div className="flex items-center gap-6 text-sm text-[#6B7280]">
@@ -335,7 +356,7 @@ export function StrategyHypotheses({
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 mb-4">
             <div className="flex items-center gap-2 mb-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50">
                 <Lightbulb className="h-4 w-4 text-amber-600" />
@@ -343,6 +364,43 @@ export function StrategyHypotheses({
               <h2 className="text-base font-semibold text-[#111827]">推荐理由</h2>
             </div>
             <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.recommendation}</p>
+          </div>
+
+          {/* 支撑材料卡片 */}
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50">
+                <FolderOpen className="h-4 w-4 text-emerald-600" />
+              </div>
+              <h2 className="text-base font-semibold text-[#111827]">支撑材料</h2>
+              <span className="ml-auto text-xs text-[#9CA3AF]">
+                {linkedMaterials.length} 个关联材料
+              </span>
+            </div>
+
+            {linkedMaterials.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-[#9CA3AF]">
+                <FolderOpen className="h-8 w-8 mb-2 text-[#D1D5DB]" />
+                <p className="text-sm">暂无关联材料</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {linkedMaterials.map((material) => (
+                  <div
+                    key={material.id}
+                    className="flex items-center gap-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 transition-colors hover:bg-[#F3F4F6]"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white border border-[#E5E7EB]">
+                      {formatIcon(material.format)}
+                    </div>
+                    <span className="flex-1 text-sm text-[#374151] truncate">{material.name}</span>
+                    <Badge className={`${formatBadgeClass(material.format)} text-[10px] px-1.5 py-0 shrink-0`}>
+                      {material.format}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

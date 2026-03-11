@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { GitPullRequest, Search, Check, X, Eye, Clock, Briefcase, FolderKanban, GitBranch, Lightbulb } from "lucide-react"
+import { GitPullRequest, Search, Check, X, Eye, Clock, Briefcase, FolderKanban, GitBranch, Lightbulb, FileText, FolderOpen } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -12,21 +12,25 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-import type { PendingStrategy, PendingHypothesis } from "./strategies-grid"
+import type { PendingStrategy, PendingHypothesis, PendingTerm, PendingMaterial } from "./strategies-grid"
 import type { PendingProject } from "./projects-grid"
 import type { PendingPhase } from "./workflow"
 
-type PendingRequest = 
+type PendingRequest =
   | { type: "strategy"; data: PendingStrategy }
   | { type: "project"; data: PendingProject }
   | { type: "phase"; data: PendingPhase }
   | { type: "hypothesis"; data: PendingHypothesis }
+  | { type: "term"; data: PendingTerm }
+  | { type: "material"; data: PendingMaterial }
 
 interface ChangeRequestsProps {
   pendingStrategies: PendingStrategy[]
   pendingProjects: PendingProject[]
   pendingPhases: PendingPhase[]
   pendingHypotheses: PendingHypothesis[]
+  pendingTerms: PendingTerm[]
+  pendingMaterials: PendingMaterial[]
   onApproveStrategy: (id: string) => void
   onRejectStrategy: (id: string) => void
   onApproveProject: (id: string) => void
@@ -35,14 +39,20 @@ interface ChangeRequestsProps {
   onRejectPhase: (id: string) => void
   onApproveHypothesis: (id: string) => void
   onRejectHypothesis: (id: string) => void
+  onApproveTerm: (id: string) => void
+  onRejectTerm: (id: string) => void
+  onApproveMaterial: (id: string) => void
+  onRejectMaterial: (id: string) => void
 }
 
-export function ChangeRequests({ 
-  pendingStrategies, 
+export function ChangeRequests({
+  pendingStrategies,
   pendingProjects,
   pendingPhases,
   pendingHypotheses,
-  onApproveStrategy, 
+  pendingTerms,
+  pendingMaterials,
+  onApproveStrategy,
   onRejectStrategy,
   onApproveProject,
   onRejectProject,
@@ -50,11 +60,15 @@ export function ChangeRequests({
   onRejectPhase,
   onApproveHypothesis,
   onRejectHypothesis,
+  onApproveTerm,
+  onRejectTerm,
+  onApproveMaterial,
+  onRejectMaterial,
 }: ChangeRequestsProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<PendingRequest | null>(null)
-  const [filterType, setFilterType] = useState<"all" | "strategy" | "project" | "phase" | "hypothesis">("all")
+  const [filterType, setFilterType] = useState<"all" | "strategy" | "project" | "phase" | "hypothesis" | "term" | "material">("all")
 
   // Combine all requests
   const allRequests: PendingRequest[] = [
@@ -62,10 +76,12 @@ export function ChangeRequests({
     ...pendingProjects.map((p) => ({ type: "project" as const, data: p })),
     ...pendingPhases.map((p) => ({ type: "phase" as const, data: p })),
     ...pendingHypotheses.map((h) => ({ type: "hypothesis" as const, data: h })),
+    ...pendingTerms.map((t) => ({ type: "term" as const, data: t })),
+    ...pendingMaterials.map((m) => ({ type: "material" as const, data: m })),
   ].sort((a, b) => new Date(b.data.initiatedAt).getTime() - new Date(a.data.initiatedAt).getTime())
 
   const filteredRequests = allRequests.filter((r) => {
-    const matchesSearch = 
+    const matchesSearch =
       r.data.changeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.data.changeId.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesType = filterType === "all" || r.type === filterType
@@ -77,6 +93,8 @@ export function ChangeRequests({
   const projectCount = pendingProjects.length
   const phaseCount = pendingPhases.length
   const hypothesisCount = pendingHypotheses.length
+  const termCount = pendingTerms.length
+  const materialCount = pendingMaterials.length
 
   function handleViewDetail(request: PendingRequest) {
     setSelectedRequest(request)
@@ -90,8 +108,12 @@ export function ChangeRequests({
       onApproveProject(request.data.id)
     } else if (request.type === "phase") {
       onApprovePhase(request.data.id)
-    } else {
+    } else if (request.type === "hypothesis") {
       onApproveHypothesis(request.data.id)
+    } else if (request.type === "term") {
+      onApproveTerm(request.data.id)
+    } else {
+      onApproveMaterial(request.data.id)
     }
   }
 
@@ -102,8 +124,12 @@ export function ChangeRequests({
       onRejectProject(request.data.id)
     } else if (request.type === "phase") {
       onRejectPhase(request.data.id)
-    } else {
+    } else if (request.type === "hypothesis") {
       onRejectHypothesis(request.data.id)
+    } else if (request.type === "term") {
+      onRejectTerm(request.data.id)
+    } else {
+      onRejectMaterial(request.data.id)
     }
   }
 
@@ -136,7 +162,7 @@ export function ChangeRequests({
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           <button
             onClick={() => setFilterType("all")}
             className={cn(
@@ -226,6 +252,42 @@ export function ChangeRequests({
               {hypothesisCount}
             </span>
           </button>
+          <button
+            onClick={() => setFilterType("term")}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              filterType === "term"
+                ? "bg-[#7C3AED] text-white"
+                : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB]"
+            )}
+          >
+            <FileText className="h-4 w-4" />
+            条款
+            <span className={cn(
+              "rounded-full px-2 py-0.5 text-xs",
+              filterType === "term" ? "bg-white/20" : "bg-[#F3F4F6]"
+            )}>
+              {termCount}
+            </span>
+          </button>
+          <button
+            onClick={() => setFilterType("material")}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              filterType === "material"
+                ? "bg-[#059669] text-white"
+                : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:bg-[#F9FAFB]"
+            )}
+          >
+            <FolderOpen className="h-4 w-4" />
+            材料
+            <span className={cn(
+              "rounded-full px-2 py-0.5 text-xs",
+              filterType === "material" ? "bg-white/20" : "bg-[#F3F4F6]"
+            )}>
+              {materialCount}
+            </span>
+          </button>
         </div>
 
         {/* Requests List */}
@@ -260,15 +322,24 @@ export function ChangeRequests({
                   <div>
                     <Badge className={cn(
                       "text-[10px]",
-                      request.type === "strategy" 
+                      request.type === "strategy"
                         ? "bg-blue-50 text-blue-700 border-blue-200"
                         : request.type === "project"
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : request.type === "hypothesis"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : "bg-violet-50 text-violet-700 border-violet-200"
+                            : request.type === "term"
+                              ? "bg-violet-50 text-violet-700 border-violet-200"
+                              : request.type === "material"
+                                ? "bg-teal-50 text-teal-700 border-teal-200"
+                                : "bg-purple-50 text-purple-700 border-purple-200"
                     )}>
-                      {request.type === "strategy" ? "策略" : request.type === "project" ? "项目" : request.type === "hypothesis" ? "假设" : "工作流"}
+                      {request.type === "strategy" ? "策略"
+                        : request.type === "project" ? "项目"
+                        : request.type === "hypothesis" ? "假设"
+                        : request.type === "term" ? "条款"
+                        : request.type === "material" ? "材料"
+                        : "工作流"}
                     </Badge>
                   </div>
 
@@ -282,13 +353,17 @@ export function ChangeRequests({
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[#111827] truncate">{request.data.changeName}</p>
                     <p className="text-xs text-[#6B7280] truncate">
-                      {request.type === "strategy" 
+                      {request.type === "strategy"
                         ? `策略类型: ${(request.data as PendingStrategy).strategy.type}`
                         : request.type === "project"
                           ? `策略模板: ${(request.data as PendingProject).project.strategyName || "无"}`
                           : request.type === "hypothesis"
                             ? `假设方向: ${(request.data as PendingHypothesis).hypothesis.direction}`
-                            : `项目: ${(request.data as PendingPhase).projectName}`
+                            : request.type === "term"
+                              ? `条款方向: ${(request.data as PendingTerm).term.direction}`
+                              : request.type === "material"
+                                ? `材料类别: ${(request.data as PendingMaterial).category}`
+                                : `项目: ${(request.data as PendingPhase).projectName}`
                       }
                     </p>
                   </div>
@@ -372,11 +447,24 @@ export function ChangeRequests({
                   <span className="text-sm text-[#6B7280]">类型</span>
                   <Badge className={cn(
                     "text-xs",
-                    selectedRequest.type === "strategy" 
+                    selectedRequest.type === "strategy"
                       ? "bg-blue-50 text-blue-700 border-blue-200"
-                      : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : selectedRequest.type === "project"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : selectedRequest.type === "hypothesis"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : selectedRequest.type === "term"
+                            ? "bg-violet-50 text-violet-700 border-violet-200"
+                            : selectedRequest.type === "material"
+                              ? "bg-teal-50 text-teal-700 border-teal-200"
+                              : "bg-purple-50 text-purple-700 border-purple-200"
                   )}>
-                    {selectedRequest.type === "strategy" ? "策略" : "项目"}
+                    {selectedRequest.type === "strategy" ? "策略"
+                      : selectedRequest.type === "project" ? "项目"
+                      : selectedRequest.type === "hypothesis" ? "假设"
+                      : selectedRequest.type === "term" ? "条款"
+                      : selectedRequest.type === "material" ? "材料"
+                      : "工作流"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
@@ -398,7 +486,7 @@ export function ChangeRequests({
                       </Badge>
                     </div>
                   </>
-                ) : (
+                ) : selectedRequest.type === "project" ? (
                   <>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-[#6B7280]">项目名称</span>
@@ -425,26 +513,86 @@ export function ChangeRequests({
                       </span>
                     </div>
                   </>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#6B7280]">负责人</span>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-5 w-5">
-                      <AvatarFallback className="bg-[#E5E7EB] text-[8px] text-[#374151]">
-                        {selectedRequest.type === "strategy" 
-                          ? (selectedRequest.data as PendingStrategy).strategy.owner.initials.slice(0, 1)
-                          : (selectedRequest.data as PendingProject).project.owner.initials.slice(0, 1)
-                        }
-                      </AvatarFallback>
-                    </Avatar>
+                ) : selectedRequest.type === "hypothesis" ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">假设名称</span>
+                      <span className="text-sm font-medium text-[#111827] text-right max-w-[240px] leading-snug">
+                        {(selectedRequest.data as PendingHypothesis).hypothesis.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">假设方向</span>
+                      <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
+                        {(selectedRequest.data as PendingHypothesis).hypothesis.direction}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">假设类别</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-xs">
+                        {(selectedRequest.data as PendingHypothesis).hypothesis.category}
+                      </Badge>
+                    </div>
+                  </>
+                ) : selectedRequest.type === "term" ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">条款名称</span>
+                      <span className="text-sm font-medium text-[#111827] text-right max-w-[240px] leading-snug">
+                        {(selectedRequest.data as PendingTerm).term.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">条款方向</span>
+                      <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-xs">
+                        {(selectedRequest.data as PendingTerm).term.direction}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">条款类别</span>
+                      <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-xs">
+                        {(selectedRequest.data as PendingTerm).term.category}
+                      </Badge>
+                    </div>
+                  </>
+                ) : selectedRequest.type === "material" ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B7280]">材料名称</span>
+                      <span className="text-sm font-medium text-[#111827] text-right max-w-[240px] leading-snug">
+                        {(selectedRequest.data as PendingMaterial).name}
+                      </span>
+                    </div>
+                    {(selectedRequest.data as PendingMaterial).category && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#6B7280]">材料类别</span>
+                        <Badge className="bg-teal-50 text-teal-700 border-teal-200 text-xs">
+                          {(selectedRequest.data as PendingMaterial).category}
+                        </Badge>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm text-[#6B7280] mb-2">上传文件</p>
+                      <div className="space-y-1.5">
+                        {(selectedRequest.data as PendingMaterial).files.map((f) => (
+                          <div key={f.id} className="flex items-center gap-2 rounded-md bg-[#F9FAFB] border border-[#E5E7EB] px-3 py-1.5">
+                            <FileText className="h-3.5 w-3.5 text-[#6B7280] shrink-0" />
+                            <span className="flex-1 truncate text-xs text-[#374151]">{f.name}</span>
+                            <Badge variant="outline" className="text-[10px] shrink-0">{f.format}</Badge>
+                            <span className="text-[10px] text-[#9CA3AF] shrink-0">{f.size}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#6B7280]">所属项目</span>
                     <span className="text-sm font-medium text-[#111827]">
-                      {selectedRequest.type === "strategy" 
-                        ? (selectedRequest.data as PendingStrategy).strategy.owner.name
-                        : (selectedRequest.data as PendingProject).project.owner.name
-                      }
+                      {(selectedRequest.data as PendingPhase).projectName}
                     </span>
                   </div>
-                </div>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#6B7280]">发起人</span>
                   <div className="flex items-center gap-2">
@@ -462,15 +610,23 @@ export function ChangeRequests({
                 </div>
               </div>
 
-              <div>
-                <p className="text-sm font-medium text-[#374151] mb-2">简介</p>
-                <p className="text-sm text-[#6B7280] bg-[#F9FAFB] rounded-lg p-3">
-                  {selectedRequest.type === "strategy" 
-                    ? (selectedRequest.data as PendingStrategy).strategy.description
-                    : (selectedRequest.data as PendingProject).project.description
-                  }
-                </p>
-              </div>
+              {(selectedRequest.type === "strategy" || selectedRequest.type === "project" || selectedRequest.type === "hypothesis" || selectedRequest.type === "term" || selectedRequest.type === "material") && (
+                <div>
+                  <p className="text-sm font-medium text-[#374151] mb-2">简介</p>
+                  <p className="text-sm text-[#6B7280] bg-[#F9FAFB] rounded-lg p-3">
+                    {selectedRequest.type === "strategy"
+                      ? (selectedRequest.data as PendingStrategy).strategy.description
+                      : selectedRequest.type === "project"
+                        ? (selectedRequest.data as PendingProject).project.description
+                        : selectedRequest.type === "hypothesis"
+                          ? (selectedRequest.data as PendingHypothesis).hypothesis.content
+                          : selectedRequest.type === "term"
+                            ? (selectedRequest.data as PendingTerm).term.content
+                            : (selectedRequest.data as PendingMaterial).description
+                    }
+                  </p>
+                </div>
+              )}
 
               <div>
                 <p className="text-sm font-medium text-[#374151] mb-2">审核人</p>

@@ -18,6 +18,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -58,20 +59,35 @@ const aiRecommendedTerms = [
   {
     id: "t1",
     title: "技术里程碑对赌条款",
+    direction: "里程碑条款",
+    category: "技术里程碑",
     content: "约定目标公司需在投资后12个月内完成自研大模型发布，模型参数规模不低于100B，在公开评测集上达到行业前三水平，否则触发估值调整机制。",
-    category: "里程碑",
+    relatedMaterials: ["m1", "m5"],
+    relatedHypotheses: [
+      { id: "h1", direction: "技术攻关", category: "算力与芯片", name: "大模型推理成本下降假设" },
+    ],
   },
   {
     id: "t2",
     title: "算力成本锁定条款",
-    content: "要求目标公司与主要云服务商签订不少于24个月的算力采购协议，锁定GPU租赁价格，确保训练成本可控，并在条款中约定成本超支时的处理机制。",
+    direction: "经济条款",
     category: "成本控制",
+    content: "要求目标公司与主要云服务商签订不少于24个月的算力采购协议，锁定GPU租赁价格，确保训练成本可控，并在条款中约定成本超支时的处理机制。",
+    relatedMaterials: ["m2", "m7"],
+    relatedHypotheses: [
+      { id: "h2", direction: "市场判断", category: "市场规模", name: "多模态融合市场假设" },
+    ],
   },
   {
     id: "t3",
     title: "核心团队绑定条款",
-    content: "关键技术人员（CTO、首席科学家、核心算法负责人）需签订不少于4年的服务协议，离职需提前6个月通知并完成知识交接，违约金不低于年薪的200%。",
+    direction: "控制权条款",
     category: "团队稳定",
+    content: "关键技术人员（CTO、首席科学家、核心算法负责人）需签订不少于4年的服务协议，离职需提前6个月通知并完成知识交接，违约金不低于年薪的200%。",
+    relatedMaterials: ["m3"],
+    relatedHypotheses: [
+      { id: "h3", direction: "竞争格局", category: "生态竞争", name: "开源模型生态竞争假设" },
+    ],
   },
 ]
 
@@ -79,19 +95,19 @@ const aiRecommendedMaterials = [
   {
     id: "m1",
     title: "大模型行业研究报告",
-    content: "Gartner、IDC、麦肯锡等权威机构发布的生成式AI与大模型行业年度研究报告，涵盖全球市场规模预测、主要玩家格局分析、技术成熟度曲线及应用落地趋势。建议收集近两年主要报告进行横向对比，作为策略市场规模假设的数据支撑依据，并关注各机构对行业增速、渗透率的分歧与共识。",
+    content: "Gartner 发布的2024年度生成式AI与大模型行业研究报告，涵盖全球市场规模预测、主要玩家格局分析、技术成熟度曲线及应用落地趋势，可作为策略市场规模假设的权威数据支撑依据。",
     category: "行业报告",
   },
   {
     id: "m2",
     title: "AI监管政策与合规文件",
-    content: "汇集中国《生成式人工智能服务管理暂行办法》、欧盟EU AI Act、美国AI行政令等主要市场的大模型监管政策文件，分析各地区合规要求对商业模式的影响。同时关注数据安全、著作权保护等相关法规，评估被投企业所在市场的合规风险敞口，并跟踪政策演进对行业格局的潜在重塑效应。",
+    content: "欧盟2024年正式生效的《人工智能法案》（EU AI Act）全文，系统规定了高风险AI系统的合规要求、禁止性应用范围及义务主体责任，可用于评估被投企业在欧洲市场的合规风险敞口。",
     category: "政策法规",
   },
   {
     id: "m3",
     title: "大模型能力评测基准体系",
-    content: "梳理业界主流评测基准框架，包括综合能力类（MMLU、C-Eval）、代码生成类（HumanEval、MBPP）、数学推理类（GSM8K、MATH）及中文专项基准，附各主要模型（GPT-4、Claude、Gemini、文心、通义等）最新评测成绩对比表。该材料可作为策略层面统一的技术评估标尺，用于横向比较赛道内不同被投候选企业的模型实力。",
+    content: "2024年发布的LLM能力评测基准体系综述，系统梳理MMLU、C-Eval、HumanEval、GSM8K等主流评测框架的适用场景与评分标准，可作为策略层面统一的技术评估标尺，用于横向比较赛道内被投候选企业的模型实力。",
     category: "技术参考",
   },
 ]
@@ -190,23 +206,47 @@ export interface HypothesisPrefillData {
 
 export interface TermPrefillData {
   title: string
-  content: string
+  direction: string
   category: string
+  content: string
+  relatedMaterials: string[]
+  relatedHypotheses: { id: string; direction: string; category: string; name: string }[]
+}
+
+export interface MaterialPrefillData {
+  title: string
+  category: string
+  content: string
 }
 
 interface StrategyOverviewProps {
   strategy?: Strategy
   onNavigateToHypotheses?: (prefillData?: HypothesisPrefillData) => void
   onNavigateToTerms?: (prefillData?: TermPrefillData) => void
+  onNavigateToMaterials?: (prefillData?: MaterialPrefillData) => void
+  hypothesesGenerated: boolean
+  onSetHypothesesGenerated: (v: boolean) => void
+  termsGenerated: boolean
+  onSetTermsGenerated: (v: boolean) => void
+  materialsGenerated: boolean
+  onSetMaterialsGenerated: (v: boolean) => void
 }
 
-export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateToTerms }: StrategyOverviewProps) {
-  // AI推荐生成状态
-  const [hypothesesGenerated, setHypothesesGenerated] = useState(false)
+export function StrategyOverview({
+  strategy,
+  onNavigateToHypotheses,
+  onNavigateToTerms,
+  onNavigateToMaterials,
+  hypothesesGenerated,
+  onSetHypothesesGenerated,
+  termsGenerated,
+  onSetTermsGenerated,
+  materialsGenerated,
+  onSetMaterialsGenerated,
+}: StrategyOverviewProps) {
+  // 加载状态保持本地（瞬态，无需持久化）
   const [hypothesesLoading, setHypothesesLoading] = useState(false)
-  const [termsGenerated, setTermsGenerated] = useState(false)
   const [termsLoading, setTermsLoading] = useState(false)
-  const [materialsGenerated, setMaterialsGenerated] = useState(false)
   const [materialsLoading, setMaterialsLoading] = useState(false)
   const [expandedMaterials, setExpandedMaterials] = useState<Set<string>>(new Set())
 
@@ -221,27 +261,30 @@ export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateT
   // 生成推荐假设
   const handleGenerateHypotheses = () => {
     setHypothesesLoading(true)
+    onSetHypothesesGenerated(false)
     setTimeout(() => {
       setHypothesesLoading(false)
-      setHypothesesGenerated(true)
+      onSetHypothesesGenerated(true)
     }, 1500)
   }
 
   // 生成推荐条款
   const handleGenerateTerms = () => {
     setTermsLoading(true)
+    onSetTermsGenerated(false)
     setTimeout(() => {
       setTermsLoading(false)
-      setTermsGenerated(true)
+      onSetTermsGenerated(true)
     }, 1500)
   }
 
   // 生成推荐材料
   const handleGenerateMaterials = () => {
     setMaterialsLoading(true)
+    onSetMaterialsGenerated(false)
     setTimeout(() => {
       setMaterialsLoading(false)
-      setMaterialsGenerated(true)
+      onSetMaterialsGenerated(true)
     }, 1500)
   }
   // If strategy is provided (new strategy), use its data
@@ -405,6 +448,15 @@ export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateT
                 <Lightbulb className="h-4 w-4 text-amber-600" />
               </div>
               <h3 className="text-sm font-semibold text-[#111827]">推荐假设</h3>
+              {hypothesesGenerated && !hypothesesLoading && (
+                <button
+                  onClick={handleGenerateHypotheses}
+                  className="ml-auto flex items-center gap-1 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-2 py-1 text-[11px] font-medium text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#374151]"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  重新生成
+                </button>
+              )}
             </div>
             
             {!hypothesesGenerated && !hypothesesLoading ? (
@@ -470,6 +522,15 @@ export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateT
                 <FileText className="h-4 w-4 text-violet-600" />
               </div>
               <h3 className="text-sm font-semibold text-[#111827]">推荐条款</h3>
+              {termsGenerated && !termsLoading && (
+                <button
+                  onClick={handleGenerateTerms}
+                  className="ml-auto flex items-center gap-1 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-2 py-1 text-[11px] font-medium text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#374151]"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  重新生成
+                </button>
+              )}
             </div>
             
             {!termsGenerated && !termsLoading ? (
@@ -498,13 +559,25 @@ export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateT
                   <div key={item.id} className="rounded-lg border border-[#E5E7EB] p-3 bg-[#F9FAFB]">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <span className="text-xs font-medium text-[#111827]">{item.title}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-[10px] px-1.5 py-0">
+                        {item.direction}
+                      </Badge>
                       <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] px-1.5 py-0">
                         {item.category}
                       </Badge>
                     </div>
                     <p className="text-[11px] text-[#6B7280] leading-relaxed line-clamp-2 mb-2">{item.content}</p>
                     <button
-                      onClick={() => onNavigateToTerms?.({ title: item.title, content: item.content, category: item.category })}
+                      onClick={() => onNavigateToTerms?.({
+                        title: item.title,
+                        direction: item.direction,
+                        category: item.category,
+                        content: item.content,
+                        relatedMaterials: item.relatedMaterials,
+                        relatedHypotheses: item.relatedHypotheses,
+                      })}
                       className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]"
                     >
                       创建此条款
@@ -523,6 +596,15 @@ export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateT
                 <FolderOpen className="h-4 w-4 text-emerald-600" />
               </div>
               <h3 className="text-sm font-semibold text-[#111827]">推荐通用材料</h3>
+              {materialsGenerated && !materialsLoading && (
+                <button
+                  onClick={handleGenerateMaterials}
+                  className="ml-auto flex items-center gap-1 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-2 py-1 text-[11px] font-medium text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#374151]"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  重新生成
+                </button>
+              )}
             </div>
             
             {!materialsGenerated && !materialsLoading ? (
@@ -570,7 +652,14 @@ export function StrategyOverview({ strategy, onNavigateToHypotheses, onNavigateT
                           <>详情<ChevronDown className="h-3 w-3" /></>
                         )}
                       </button>
-                      <button className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]">
+                      <button
+                        onClick={() => onNavigateToMaterials?.({
+                          title: item.title,
+                          category: item.category,
+                          content: item.content,
+                        })}
+                        className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium hover:text-[#1D4ED8]"
+                      >
                         上传此通用材料
                         <ChevronRight className="h-3 w-3" />
                       </button>

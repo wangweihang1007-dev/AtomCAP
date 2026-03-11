@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils"
 /* ------------------------------------------------------------------ */
 /*  Data types                                                         */
 /* ------------------------------------------------------------------ */
-interface HypothesisTableItem {
+export interface HypothesisTableItem {
   id: string
   direction: string  // 假设方向 (一级类目)
   category: string   // 假设类别 (二级类目)
@@ -400,24 +400,37 @@ const aiInfrastructureHypotheses: HypothesisTableItem[] = [
 ]
 
 /* ------------------------------------------------------------------ */
+/*  Template helper                                                    */
+/* ------------------------------------------------------------------ */
+/** 返回指定策略模板的假设列表，全部状态重置为"待验证" */
+export function getTemplateHypothesesForStrategy(strategyId: string): HypothesisTableItem[] {
+  if (strategyId === "1") {
+    return aiInfrastructureHypotheses.map((h) => ({ ...h, status: "pending" as const }))
+  }
+  return []
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main Component                                                     */
 /* ------------------------------------------------------------------ */
 interface HypothesisChecklistProps {
   isNewProject?: boolean
   project?: { strategyId?: string; strategyName?: string }
+  inheritedHypotheses?: HypothesisTableItem[]
 }
 
-export function HypothesisChecklist({ isNewProject = false, project }: HypothesisChecklistProps) {
+export function HypothesisChecklist({ isNewProject = false, project, inheritedHypotheses }: HypothesisChecklistProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
   const [showTemplateBanner, setShowTemplateBanner] = useState(true)
 
-  // Select data based on project's strategy template
-  // For new projects with AI基础设施 (strategyId="1"), use AI infrastructure hypotheses
-  const sourceData = isNewProject && project?.strategyId === "1" 
-    ? aiInfrastructureHypotheses 
-    : hypothesisTableData
+  // Priority: inherited (from approved project) > template > existing mock data
+  const sourceData = inheritedHypotheses
+    ? inheritedHypotheses
+    : isNewProject && project?.strategyId === "1"
+      ? aiInfrastructureHypotheses
+      : hypothesisTableData
 
   // Filter data
   const filteredData = sourceData.filter((item) => {

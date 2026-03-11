@@ -11,12 +11,13 @@ import {
   PanelLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { HypothesisChecklist } from "@/components/pages/hypothesis-checklist"
+import { HypothesisChecklist, type HypothesisTableItem } from "@/components/pages/hypothesis-checklist"
 import { ProjectOverview } from "@/components/pages/project-overview"
-import { TermSheet } from "@/components/pages/term-sheet"
+import { TermSheet, type TermTableItem } from "@/components/pages/term-sheet"
 import { Workflow, type Phase, type PendingPhase } from "@/components/pages/workflow"
 import { ProjectMaterials } from "@/components/pages/project-materials"
 import { type Project } from "@/components/pages/projects-grid"
+import { type StrategyMaterial } from "@/components/pages/strategies-grid"
 
 type SubPageKey =
   | "overview"
@@ -53,9 +54,12 @@ interface ProjectDetailProps {
   phases?: Phase[]
   onPhasesChange?: (phases: Phase[]) => void
   onCreatePendingPhase?: (pending: PendingPhase) => void
+  projectHypotheses?: HypothesisTableItem[]
+  projectTerms?: TermTableItem[]
+  projectMaterials?: StrategyMaterial[]
 }
 
-export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase }: ProjectDetailProps) {
+export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase, projectHypotheses, projectTerms, projectMaterials }: ProjectDetailProps) {
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
   const isNewProject = projectId.startsWith("new-project-")
@@ -136,23 +140,38 @@ export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCr
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeSubPage === "workflow" ? (
-          <Workflow 
-            onSelectPhase={setCurrentPhase} 
+          <Workflow
+            onSelectPhase={setCurrentPhase}
             isNewProject={isNewProject}
             projectId={projectId}
             projectName={project?.name || ""}
             phases={phases}
             onPhasesChange={onPhasesChange}
             onCreatePendingPhase={onCreatePendingPhase}
+            hypothesesCount={projectHypotheses?.length}
+            termsCount={projectTerms?.length}
+            materialsCount={projectMaterials?.length}
           />
         ) : activeSubPage === "hypotheses" ? (
-          <HypothesisChecklist isNewProject={isNewProject} project={project} />
+          <HypothesisChecklist
+            isNewProject={isNewProject}
+            project={project}
+            inheritedHypotheses={projectHypotheses}
+          />
         ) : activeSubPage === "terms" ? (
-          <TermSheet isNewProject={isNewProject} project={project} />
+          <TermSheet
+            isNewProject={isNewProject}
+            project={project}
+            inheritedTerms={projectTerms}
+          />
         ) : activeSubPage === "overview" ? (
           <ProjectOverview project={project} isNewProject={isNewProject} />
         ) : activeSubPage === "materials" ? (
-          <ProjectMaterials isNewProject={isNewProject} project={project} />
+          <ProjectMaterials
+            isNewProject={isNewProject}
+            project={project}
+            strategyMaterials={projectMaterials}
+          />
         ) : null}
       </div>
     </div>

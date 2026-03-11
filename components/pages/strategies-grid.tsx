@@ -91,6 +91,57 @@ export interface PendingHypothesis {
   reviewers: { id: string; name: string; initials: string }[]
 }
 
+export interface StrategyTerm {
+  id: string
+  strategyId: string
+  direction: string
+  category: string
+  name: string
+  content: string
+  recommendation: string
+  relatedMaterials: string[]
+  relatedHypotheses: { id: string; direction: string; category: string; name: string }[]
+  owner: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PendingTerm {
+  id: string
+  term: Omit<StrategyTerm, "id">
+  changeId: string
+  changeName: string
+  initiator: { id: string; name: string; initials: string }
+  initiatedAt: string
+  reviewers: { id: string; name: string; initials: string }[]
+}
+
+export interface StrategyMaterial {
+  id: string
+  strategyId: string
+  name: string      // file name
+  format: string    // PDF, XLSX, etc.
+  size: string      // e.g., "6.8 MB"
+  description: string
+  category: string
+  owner: string
+  createdAt: string
+}
+
+export interface PendingMaterial {
+  id: string
+  strategyId: string
+  name: string         // recommendation title / display name
+  category: string
+  description: string  // editable description from upload form
+  files: { id: string; name: string; format: string; size: string }[]
+  changeId: string
+  changeName: string
+  initiator: { id: string; name: string; initials: string }
+  initiatedAt: string
+  reviewers: { id: string; name: string; initials: string }[]
+}
+
 export const initialStrategies: Strategy[] = [
   {
     id: "1",

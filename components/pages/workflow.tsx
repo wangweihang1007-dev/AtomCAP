@@ -293,6 +293,9 @@ interface WorkflowProps {
   phases?: Phase[]
   onPhasesChange?: (phases: Phase[]) => void
   onCreatePendingPhase?: (pending: PendingPhase) => void
+  hypothesesCount?: number
+  termsCount?: number
+  materialsCount?: number
 }
 
 /* ─── New Project Phase Template ─────────────── */
@@ -316,14 +319,17 @@ function createNewPhase(phaseNumber: number, isSetup: boolean): Phase {
 }
 
 /* ─── Component ──────────────────────────────── */
-export function Workflow({ 
-  onSelectPhase, 
+export function Workflow({
+  onSelectPhase,
   isNewProject = false,
   projectId = "",
   projectName = "",
   phases,
   onPhasesChange,
   onCreatePendingPhase,
+  hypothesesCount,
+  termsCount,
+  materialsCount,
 }: WorkflowProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -655,29 +661,37 @@ export function Workflow({
                         )}
 
                         {/* Stats */}
-                        <div className="grid grid-cols-3 gap-2 mb-3">
-                          <div className="flex items-center gap-1.5 rounded-lg bg-white/80 px-2 py-1.5 border border-[#E5E7EB]">
-                            <ListChecks className="h-3 w-3 text-[#2563EB]" />
-                            <div>
-                              <p className="text-[10px] text-[#9CA3AF]">{"\u5047\u8BBE"}</p>
-                              <p className="text-xs font-semibold text-[#111827]">{phase.hypothesesCount}</p>
+                        {(() => {
+                          const isActive = phase.status === "active"
+                          const displayH = isActive && hypothesesCount !== undefined ? hypothesesCount : phase.hypothesesCount
+                          const displayT = isActive && termsCount !== undefined ? termsCount : phase.termsCount
+                          const displayM = isActive && materialsCount !== undefined ? materialsCount : phase.materialsCount
+                          return (
+                            <div className="grid grid-cols-3 gap-2 mb-3">
+                              <div className="flex items-center gap-1.5 rounded-lg bg-white/80 px-2 py-1.5 border border-[#E5E7EB]">
+                                <ListChecks className="h-3 w-3 text-[#2563EB]" />
+                                <div>
+                                  <p className="text-[10px] text-[#9CA3AF]">{"\u5047\u8BBE"}</p>
+                                  <p className="text-xs font-semibold text-[#111827]">{displayH}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 rounded-lg bg-white/80 px-2 py-1.5 border border-[#E5E7EB]">
+                                <FileText className="h-3 w-3 text-emerald-600" />
+                                <div>
+                                  <p className="text-[10px] text-[#9CA3AF]">{"\u6761\u6B3E"}</p>
+                                  <p className="text-xs font-semibold text-[#111827]">{displayT}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 rounded-lg bg-white/80 px-2 py-1.5 border border-[#E5E7EB]">
+                                <FolderOpen className="h-3 w-3 text-amber-600" />
+                                <div>
+                                  <p className="text-[10px] text-[#9CA3AF]">{"\u6750\u6599"}</p>
+                                  <p className="text-xs font-semibold text-[#111827]">{displayM}</p>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 rounded-lg bg-white/80 px-2 py-1.5 border border-[#E5E7EB]">
-                            <FileText className="h-3 w-3 text-emerald-600" />
-                            <div>
-                              <p className="text-[10px] text-[#9CA3AF]">{"\u6761\u6B3E"}</p>
-                              <p className="text-xs font-semibold text-[#111827]">{phase.termsCount}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 rounded-lg bg-white/80 px-2 py-1.5 border border-[#E5E7EB]">
-                            <FolderOpen className="h-3 w-3 text-amber-600" />
-                            <div>
-                              <p className="text-[10px] text-[#9CA3AF]">{"\u6750\u6599"}</p>
-                              <p className="text-xs font-semibold text-[#111827]">{phase.materialsCount}</p>
-                            </div>
-                          </div>
-                        </div>
+                          )
+                        })()}
 
                         {/* Date */}
                         {phase.startDate && (

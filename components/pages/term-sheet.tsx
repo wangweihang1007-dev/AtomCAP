@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils"
 /* ------------------------------------------------------------------ */
 /*  Data types                                                         */
 /* ------------------------------------------------------------------ */
-interface TermTableItem {
+export interface TermTableItem {
   id: string
   direction: string  // 条款方向 (一级类目)
   category: string   // 条款类别 (二级类目)
@@ -361,6 +361,17 @@ const aiInfrastructureTerms: TermTableItem[] = [
 ]
 
 /* ------------------------------------------------------------------ */
+/*  Template helper                                                    */
+/* ------------------------------------------------------------------ */
+/** 返回指定策略模板的条款列表，全部状态重置为"待审批" */
+export function getTemplateTermsForStrategy(strategyId: string): TermTableItem[] {
+  if (strategyId === "1") {
+    return aiInfrastructureTerms.map((t) => ({ ...t, status: "pending" as const }))
+  }
+  return []
+}
+
+/* ------------------------------------------------------------------ */
 /*  Status helpers                                                     */
 /* ------------------------------------------------------------------ */
 const statusConfig = {
@@ -375,19 +386,21 @@ const statusConfig = {
 interface TermSheetProps {
   isNewProject?: boolean
   project?: { strategyId?: string; strategyName?: string }
+  inheritedTerms?: TermTableItem[]
 }
 
-export function TermSheet({ isNewProject = false, project }: TermSheetProps) {
+export function TermSheet({ isNewProject = false, project, inheritedTerms }: TermSheetProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
   const [showTemplateBanner, setShowTemplateBanner] = useState(true)
 
-  // Select data based on project's strategy template
-  // For new projects with AI基础设施 (strategyId="1"), use AI infrastructure terms
-  const sourceData = isNewProject && project?.strategyId === "1" 
-    ? aiInfrastructureTerms 
-    : termTableData
+  // Priority: inherited (from approved project) > template > existing mock data
+  const sourceData = inheritedTerms
+    ? inheritedTerms
+    : isNewProject && project?.strategyId === "1"
+      ? aiInfrastructureTerms
+      : termTableData
 
   // Filter data
   const filteredData = sourceData.filter((item) => {
