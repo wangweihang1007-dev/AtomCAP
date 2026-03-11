@@ -111,12 +111,14 @@ export interface SuggestionHypothesis {
     id: string
     title: string
     evidenceDescription: string
+    evidenceMaterialIds: string[]
     analysisContent: string
   }[]
   riskPoints: {
     id: string
     title: string
     evidenceDescription: string
+    evidenceMaterialIds: string[]
     analysisContent: string
   }[]
 }
@@ -288,7 +290,7 @@ const PHASES: Phase[] = [
     groupLabel: "存续期",
     name: "存续期 - 阶段4",
     fullLabel: "存续期 - 阶段4",
-    assignee: "王芳",
+    assignee: "��芳",
     assigneeAvatar: "王",
     hypothesesCount: 13,
     termsCount: 9,
@@ -646,18 +648,18 @@ export function Workflow({
   }
   
   function handleCreateFromHypothesis(hypothesis: SuggestionHypothesis) {
-    // Pre-fill form with hypothesis data
+    // Pre-fill form with hypothesis data including pre-selected materials
     setFormData({
       direction: hypothesis.direction,
       category: hypothesis.category,
       name: hypothesis.name,
       valuePoints: hypothesis.valuePoints.map((vp) => ({
         ...vp,
-        evidenceMaterialIds: [],
+        evidenceMaterialIds: vp.evidenceMaterialIds ?? [],
       })),
       riskPoints: hypothesis.riskPoints.map((rp) => ({
         ...rp,
-        evidenceMaterialIds: [],
+        evidenceMaterialIds: rp.evidenceMaterialIds ?? [],
       })),
     })
     setShowCreateDialog(true)
@@ -816,10 +818,10 @@ export function Workflow({
                   name: "专利布局完善性假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp1", title: "专利布局完善", evidenceDescription: "公司在核心技术领域拥有20+项专利", analysisContent: "专利覆盖核心算法、模型架构和数据处理流程，形成完整的技术护城河。" },
+                    { id: "vp1", title: "专利布局完善", evidenceDescription: "公司在核心技术领域拥有20+项专利", evidenceMaterialIds: ["m1"], analysisContent: "专利覆盖核心算法、模型架构和数据处理流程，形成完整的技术护城河。" },
                   ],
                   riskPoints: [
-                    { id: "rp1", title: "专利维护成本", evidenceDescription: "专利维护需要持续投入", analysisContent: "需评估专利维护成本对运营的影响。" },
+                    { id: "rp1", title: "专利维护成本", evidenceDescription: "专利维护需要持续投入", evidenceMaterialIds: ["m1"], analysisContent: "需评估专利维护成本对运营的影响。" },
                   ],
                 },
                 {
@@ -829,10 +831,10 @@ export function Workflow({
                   name: "技术团队核心成员稳定性假设",
                   isExisting: true,
                   valuePoints: [
-                    { id: "vp2", title: "技术团队稳定", evidenceDescription: "核心技术人员平均在职时间超过3年", analysisContent: "团队稳定性有助于技术积累和持续创新。" },
+                    { id: "vp2", title: "技术团队稳定", evidenceDescription: "核心技术人员平均在职时间超过3年", evidenceMaterialIds: ["m2"], analysisContent: "团队稳定性有助于技术积累和持续创新。" },
                   ],
                   riskPoints: [
-                    { id: "rp2", title: "人才流失风险", evidenceDescription: "AI行业人才竞争激烈", analysisContent: "需关注核心人员激励机制和竞业限制条款。" },
+                    { id: "rp2", title: "人才流失风险", evidenceDescription: "AI行业人才竞争激烈", evidenceMaterialIds: ["m2"], analysisContent: "需关注核心人员激励机制和竞业限制条款。" },
                   ],
                 },
                 {
@@ -842,10 +844,10 @@ export function Workflow({
                   name: "技术迭代能力假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp3", title: "迭代速度快", evidenceDescription: "产品更新周期短于行业平均", analysisContent: "快速迭代能力体现团队执行力和技术实力。" },
+                    { id: "vp3", title: "迭代速度快", evidenceDescription: "产品更新周期短于行业平均", evidenceMaterialIds: ["m1", "m3"], analysisContent: "快速迭代能力体现团队执行力和技术实力。" },
                   ],
                   riskPoints: [
-                    { id: "rp3", title: "技术迭代风险", evidenceDescription: "AI领域技术更新速度快", analysisContent: "需持续关注竞品技术动态，评估公司技术迭代能力。" },
+                    { id: "rp3", title: "技术迭代风险", evidenceDescription: "AI领域技术更新速度快", evidenceMaterialIds: [], analysisContent: "需持续关注竞品技术动态，评估公司技术迭代能力。" },
                   ],
                 },
               ],
@@ -869,10 +871,10 @@ export function Workflow({
                   name: "国内市场TAM假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp4", title: "市场增长潜力大", evidenceDescription: "AI基础设施市场年复合增长率超30%", analysisContent: "市场处于快速增长期，先发优势明显。" },
+                    { id: "vp4", title: "市场增长潜力大", evidenceDescription: "AI基础设施市场年复合增长率超30%", evidenceMaterialIds: ["m3", "m4"], analysisContent: "市场处于快速增长期，先发优势明显。" },
                   ],
                   riskPoints: [
-                    { id: "rp4", title: "市场竞争加剧", evidenceDescription: "行业玩家数量持续增加", analysisContent: "需评估公司差异化竞争能力。" },
+                    { id: "rp4", title: "市场竞争加剧", evidenceDescription: "行业玩家数量持续增加", evidenceMaterialIds: ["m4"], analysisContent: "需评估公司差异化竞争能力。" },
                   ],
                 },
                 {
@@ -882,10 +884,10 @@ export function Workflow({
                   name: "多模态融合市场假设",
                   isExisting: true,
                   valuePoints: [
-                    { id: "vp5", title: "多模态需求增长", evidenceDescription: "企业对多模态AI解决方案需求上升", analysisContent: "多模态融合是行业趋势，市场空间广阔。" },
+                    { id: "vp5", title: "多模态需求增长", evidenceDescription: "企业对多模态AI解决方案需求上升", evidenceMaterialIds: ["m3"], analysisContent: "多模态融合是行业趋势，市场空间广阔。" },
                   ],
                   riskPoints: [
-                    { id: "rp5", title: "技术门槛高", evidenceDescription: "多模态技术整合难度大", analysisContent: "需评估技术实现能力和竞争格局。" },
+                    { id: "rp5", title: "技术门槛高", evidenceDescription: "多模态技术整合难度大", evidenceMaterialIds: [], analysisContent: "需评估技术实现能力和竞争格局。" },
                   ],
                 },
               ],
@@ -893,7 +895,7 @@ export function Workflow({
             {
               id: "gs3",
               title: "添加商业模式可持续性假设",
-              content: "建议增加关于商业模式可持续性的假设，包括CAC/LTV比值假设、毛利率演变假设、规模效应假设等。",
+              content: "建议增加关于商业模式可持续性的假设，包括CAC/LTV比值���设、毛利率演变假设、规模效应假设等。",
               linkedTerms: [
                 { id: "t4", name: "财务信息披露条款" },
                 { id: "t5", name: "反稀释保护条款" },
@@ -910,10 +912,10 @@ export function Workflow({
                   name: "单位经济模型假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp6", title: "单位经济模型健康", evidenceDescription: "LTV/CAC比值大于3", analysisContent: "客户获取成本合理，具备规模化盈利基础。" },
+                    { id: "vp6", title: "单位经济模型健康", evidenceDescription: "LTV/CAC比值大于3", evidenceMaterialIds: ["m5", "m6"], analysisContent: "客户获取成本合理，具备规模化盈利基础。" },
                   ],
                   riskPoints: [
-                    { id: "rp6", title: "获客成本上升", evidenceDescription: "市场竞争导致获客成本上升", analysisContent: "需关注获客成本变化趋势。" },
+                    { id: "rp6", title: "获客成本上升", evidenceDescription: "市场竞争导致获客成本上升", evidenceMaterialIds: ["m5"], analysisContent: "需关注获客成本变化趋势。" },
                   ],
                 },
                 {
@@ -923,10 +925,10 @@ export function Workflow({
                   name: "毛利率演变假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp7", title: "规模效应显现", evidenceDescription: "收入增长带动毛利率提升", analysisContent: "规模扩大后边际成本下降。" },
+                    { id: "vp7", title: "规模效应显现", evidenceDescription: "收入增长带动毛利率提升", evidenceMaterialIds: ["m5", "m6"], analysisContent: "规模扩大后边际成本下降。" },
                   ],
                   riskPoints: [
-                    { id: "rp7", title: "毛利率承压", evidenceDescription: "算力成本占比高", analysisContent: "需关注算力成本下降对毛利率的影响。" },
+                    { id: "rp7", title: "毛利率承压", evidenceDescription: "算力成本占比高", evidenceMaterialIds: ["m6"], analysisContent: "需关注算力成本下降对毛利率的影响。" },
                   ],
                 },
               ],
@@ -949,10 +951,10 @@ export function Workflow({
                   name: "里程碑达成率假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp8", title: "里程碑达成率高", evidenceDescription: "过往融资轮次里程碑达成率超85%", analysisContent: "团队具备良好的目标管理和执行能力。" },
+                    { id: "vp8", title: "里程碑达成率高", evidenceDescription: "过往融资轮次里程碑达成率超85%", evidenceMaterialIds: ["m7"], analysisContent: "团队具备良好的目标管理和执行能力。" },
                   ],
                   riskPoints: [
-                    { id: "rp8", title: "外部环境变化", evidenceDescription: "宏观环境可能影响里程碑达成", analysisContent: "需评估外部因素对执行的影响。" },
+                    { id: "rp8", title: "外部环境变化", evidenceDescription: "宏观环境可能影响里程碑达成", evidenceMaterialIds: [], analysisContent: "需评估外部因素对执行的影响。" },
                   ],
                 },
                 {
@@ -962,10 +964,10 @@ export function Workflow({
                   name: "组织扩张能力假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp9", title: "管理经验丰富", evidenceDescription: "核心管理层有大厂背景", analysisContent: "具备大规模团队管理经验。" },
+                    { id: "vp9", title: "管理经验丰富", evidenceDescription: "核心管理层有大厂背景", evidenceMaterialIds: ["m7"], analysisContent: "具备大规模团队管理经验。" },
                   ],
                   riskPoints: [
-                    { id: "rp9", title: "组织扩张风险", evidenceDescription: "团队规模计划快速增长", analysisContent: "需评估组织管理能力是否匹配扩张速度。" },
+                    { id: "rp9", title: "组织扩张风险", evidenceDescription: "团队规模计划快速增长", evidenceMaterialIds: ["m7"], analysisContent: "需评估组织管理能力是否匹配扩张速度。" },
                   ],
                 },
               ],
@@ -989,10 +991,10 @@ export function Workflow({
                   name: "IPO退出可行性假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp10", title: "IPO预期明确", evidenceDescription: "公司已启动上市辅导", analysisContent: "退出路径清晰，时间节点相对确定。" },
+                    { id: "vp10", title: "IPO预期明确", evidenceDescription: "公司已启动上市辅导", evidenceMaterialIds: ["m8"], analysisContent: "退出路径清晰，时间节点相对确定。" },
                   ],
                   riskPoints: [
-                    { id: "rp10", title: "市场窗口不确定", evidenceDescription: "IPO市场波动较大", analysisContent: "需关注资本市场环境变化对上市计划的影响。" },
+                    { id: "rp10", title: "市场窗口不确定", evidenceDescription: "IPO市场波动较大", evidenceMaterialIds: [], analysisContent: "需关注资本市场环境变化对上市计划的影响。" },
                   ],
                 },
                 {
@@ -1002,10 +1004,10 @@ export function Workflow({
                   name: "并购退出场景假设",
                   isExisting: false,
                   valuePoints: [
-                    { id: "vp11", title: "战略价值高", evidenceDescription: "技术资产对大厂有吸引力", analysisContent: "具备被并购的战略价值。" },
+                    { id: "vp11", title: "战略价值高", evidenceDescription: "技术资产对大厂有吸引力", evidenceMaterialIds: ["m8", "m1"], analysisContent: "具备被并购的战略价值。" },
                   ],
                   riskPoints: [
-                    { id: "rp11", title: "估值分歧", evidenceDescription: "并购估值可能低于预期", analysisContent: "需评估并购退出的估值合理性。" },
+                    { id: "rp11", title: "估值分歧", evidenceDescription: "并购估值可能低于预期", evidenceMaterialIds: ["m8"], analysisContent: "需评估并购退出的估值合理性。" },
                   ],
                 },
               ],
@@ -1399,30 +1401,38 @@ export function Workflow({
                             className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           />
                           
-                          {/* Material Selection */}
+                          {/* Material Selection - checkbox list */}
                           <div className="mt-2">
                             <p className="text-xs text-[#6B7280] mb-1.5">关联项目材料：</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {availableMaterials.slice(0, 4).map((m) => (
-                                <button
+                            <div className="rounded-md border border-[#E5E7EB] divide-y divide-[#F3F4F6] max-h-[160px] overflow-y-auto">
+                              {availableMaterials.map((m) => (
+                                <label
                                   key={m.id}
-                                  onClick={() => handleToggleMaterial("value", vp.id, m.id)}
                                   className={cn(
-                                    "inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border transition-colors",
+                                    "flex items-center gap-2.5 px-3 py-2 cursor-pointer transition-colors text-xs",
                                     vp.evidenceMaterialIds.includes(m.id)
-                                      ? "bg-blue-50 text-blue-700 border-blue-200"
-                                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                                      ? "bg-blue-50"
+                                      : "bg-white hover:bg-[#F9FAFB]"
                                   )}
                                 >
-                                  <FileText className="h-3 w-3" />
-                                  {m.name.slice(0, 15)}...
-                                </button>
+                                  <input
+                                    type="checkbox"
+                                    checked={vp.evidenceMaterialIds.includes(m.id)}
+                                    onChange={() => handleToggleMaterial("value", vp.id, m.id)}
+                                    className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 accent-blue-600"
+                                  />
+                                  <FileText className={cn("h-3.5 w-3.5 shrink-0", vp.evidenceMaterialIds.includes(m.id) ? "text-blue-500" : "text-[#9CA3AF]")} />
+                                  <span className={cn("flex-1 truncate", vp.evidenceMaterialIds.includes(m.id) ? "text-blue-700 font-medium" : "text-[#374151]")}>
+                                    {m.name}
+                                  </span>
+                                  <span className="text-[10px] text-[#9CA3AF] shrink-0">{m.format}</span>
+                                </label>
                               ))}
-                              <button className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-dashed border-gray-300 text-gray-500 hover:bg-gray-50">
-                                <Upload className="h-3 w-3" />
-                                上传新材料
-                              </button>
                             </div>
+                            <button className="mt-1.5 inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-dashed border-gray-300 text-gray-500 hover:bg-gray-50">
+                              <Upload className="h-3 w-3" />
+                              上传新材料
+                            </button>
                           </div>
                         </div>
                         
@@ -1520,30 +1530,38 @@ export function Workflow({
                             className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           />
                           
-                          {/* Material Selection */}
+                          {/* Material Selection - checkbox list */}
                           <div className="mt-2">
                             <p className="text-xs text-[#6B7280] mb-1.5">关联项目材料：</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {availableMaterials.slice(0, 4).map((m) => (
-                                <button
+                            <div className="rounded-md border border-[#E5E7EB] divide-y divide-[#F3F4F6] max-h-[160px] overflow-y-auto">
+                              {availableMaterials.map((m) => (
+                                <label
                                   key={m.id}
-                                  onClick={() => handleToggleMaterial("risk", rp.id, m.id)}
                                   className={cn(
-                                    "inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border transition-colors",
+                                    "flex items-center gap-2.5 px-3 py-2 cursor-pointer transition-colors text-xs",
                                     rp.evidenceMaterialIds.includes(m.id)
-                                      ? "bg-blue-50 text-blue-700 border-blue-200"
-                                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                                      ? "bg-red-50"
+                                      : "bg-white hover:bg-[#F9FAFB]"
                                   )}
                                 >
-                                  <FileText className="h-3 w-3" />
-                                  {m.name.slice(0, 15)}...
-                                </button>
+                                  <input
+                                    type="checkbox"
+                                    checked={rp.evidenceMaterialIds.includes(m.id)}
+                                    onChange={() => handleToggleMaterial("risk", rp.id, m.id)}
+                                    className="h-3.5 w-3.5 rounded border-gray-300 text-red-600 accent-red-600"
+                                  />
+                                  <FileText className={cn("h-3.5 w-3.5 shrink-0", rp.evidenceMaterialIds.includes(m.id) ? "text-red-500" : "text-[#9CA3AF]")} />
+                                  <span className={cn("flex-1 truncate", rp.evidenceMaterialIds.includes(m.id) ? "text-red-700 font-medium" : "text-[#374151]")}>
+                                    {m.name}
+                                  </span>
+                                  <span className="text-[10px] text-[#9CA3AF] shrink-0">{m.format}</span>
+                                </label>
                               ))}
-                              <button className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-dashed border-gray-300 text-gray-500 hover:bg-gray-50">
-                                <Upload className="h-3 w-3" />
-                                上传新材料
-                              </button>
                             </div>
+                            <button className="mt-1.5 inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-dashed border-gray-300 text-gray-500 hover:bg-gray-50">
+                              <Upload className="h-3 w-3" />
+                              上传新材料
+                            </button>
                           </div>
                         </div>
                         
