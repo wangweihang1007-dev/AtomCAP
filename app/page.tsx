@@ -9,7 +9,7 @@ import { ProjectDetail } from "@/components/pages/project-detail"
 import { StrategyDetail } from "@/components/pages/strategy-detail"
 import { ChangeRequests } from "@/components/pages/change-requests"
 import { Login } from "@/components/pages/login"
-import type { Phase, PendingPhase } from "@/components/pages/workflow"
+import type { Phase, PendingPhase, PendingProjectHypothesis, ProjectHypothesisFormData, GeneratedSuggestion } from "@/components/pages/workflow"
 import { type HypothesisTableItem, getTemplateHypothesesForStrategy } from "@/components/pages/hypothesis-checklist"
 import { type TermTableItem, getTemplateTermsForStrategy } from "@/components/pages/term-sheet"
 import { getTemplateMaterialsForStrategy } from "@/components/pages/project-materials"
@@ -45,6 +45,10 @@ export default function Page() {
   const [projectHypotheses, setProjectHypotheses] = useState<Record<string, HypothesisTableItem[]>>({})
   const [projectTerms, setProjectTerms] = useState<Record<string, TermTableItem[]>>({})
   const [projectMaterialsMap, setProjectMaterialsMap] = useState<Record<string, StrategyMaterial[]>>({})
+  // Pending project-level hypotheses
+  const [pendingProjectHypotheses, setPendingProjectHypotheses] = useState<PendingProjectHypothesis[]>([])
+  // Saved generated hypothesis suggestions per project - keyed by projectId, persists for the session
+  const [savedProjectSuggestions, setSavedProjectSuggestions] = useState<Record<string, GeneratedSuggestion[]>>({})
   // Strategy AI recommendation generated flags - keyed by strategyId, persists for the session
   const [strategyRecommendations, setStrategyRecommendations] = useState<
     Record<string, { hypothesesGenerated: boolean; termsGenerated: boolean; materialsGenerated: boolean }>
@@ -250,6 +254,50 @@ export default function Page() {
     setPendingHypotheses(pendingHypotheses.filter((p) => p.id !== id))
   }
 
+  // Project-level hypothesis change request handlers
+  function handleCreatePendingProjectHypothesis(pending: PendingProjectHypothesis) {
+    setPendingProjectHypotheses([pending, ...pendingProjectHypotheses])
+    setView({ type: "change-requests" })
+  }
+
+  function handleApproveProjectHypothesis(id: string) {
+    const pending = pendingProjectHypotheses.find((p) => p.id === id)
+    if (pending) {
+      const { projectId, hypothesis } = pending
+      const today = new Date().toISOString().split("T")[0]
+      const newHypothesis: HypothesisTableItem = {
+        id: `proj-hyp-${Date.now()}`,
+        direction: hypothesis.direction,
+        category: hypothesis.category,
+        name: hypothesis.name,
+        owner: "张伟",
+        createdAt: today,
+        updatedAt: today,
+        status: "pending" as const,
+      }
+      const currentHypotheses = projectHypotheses[projectId] || []
+      setProjectHypotheses({
+        ...projectHypotheses,
+        [projectId]: [newHypothesis, ...currentHypotheses],
+      })
+      setPendingProjectHypotheses(pendingProjectHypotheses.filter((p) => p.id !== id))
+      // Navigate to project detail to view the new hypothesis
+      setView({ type: "project-detail", projectId })
+    }
+  }
+
+  function handleRejectProjectHypothesis(id: string) {
+    setPendingProjectHypotheses(pendingProjectHypotheses.filter((p) => p.id !== id))
+  }
+
+  // Handler to save generated suggestions for a project
+  function handleSaveProjectSuggestions(projectId: string, suggestions: GeneratedSuggestion[]) {
+    setSavedProjectSuggestions((prev) => ({
+      ...prev,
+      [projectId]: suggestions,
+    }))
+  }
+
   // Term change request handlers
   function handleCreatePendingTerm(pending: PendingTerm) {
     setPendingTerms([pending, ...pendingTerms])
@@ -378,38 +426,44 @@ export default function Page() {
           />
         )}
         {view.type === "change-requests" && (
-          <ChangeRequests
-            pendingStrategies={pendingStrategies}
-            pendingProjects={pendingProjects}
-            pendingPhases={pendingPhases}
-            pendingHypotheses={pendingHypotheses}
-            pendingTerms={pendingTerms}
-            pendingMaterials={pendingMaterials}
-            onApproveStrategy={handleApproveStrategy}
-            onRejectStrategy={handleRejectStrategy}
-            onApproveProject={handleApproveProject}
-            onRejectProject={handleRejectProject}
-            onApprovePhase={handleApprovePhase}
-            onRejectPhase={handleRejectPhase}
-            onApproveHypothesis={handleApproveHypothesis}
-            onRejectHypothesis={handleRejectHypothesis}
-            onApproveTerm={handleApproveTerm}
-            onRejectTerm={handleRejectTerm}
-            onApproveMaterial={handleApproveMaterial}
-            onRejectMaterial={handleRejectMaterial}
-          />
+<ChangeRequests
+  pendingStrategies={pendingStrategies}
+  pendingProjects={pendingProjects}
+  pendingPhases={pendingPhases}
+  pendingHypotheses={pendingHypotheses}
+  pendingProjectHypotheses={pendingProjectHypotheses}
+  pendingTerms={pendingTerms}
+  pendingMaterials={pendingMaterials}
+  onApproveStrategy={handleApproveStrategy}
+  onRejectStrategy={handleRejectStrategy}
+  onApproveProject={handleApproveProject}
+  onRejectProject={handleRejectProject}
+  onApprovePhase={handleApprovePhase}
+  onRejectPhase={handleRejectPhase}
+  onApproveHypothesis={handleApproveHypothesis}
+  onRejectHypothesis={handleRejectHypothesis}
+  onApproveProjectHypothesis={handleApproveProjectHypothesis}
+  onRejectProjectHypothesis={handleRejectProjectHypothesis}
+  onApproveTerm={handleApproveTerm}
+  onRejectTerm={handleRejectTerm}
+  onApproveMaterial={handleApproveMaterial}
+  onRejectMaterial={handleRejectMaterial}
+  />
         )}
         {view.type === "project-detail" && (
-          <ProjectDetail
-            projectId={view.projectId}
-            project={projects.find((p) => p.id === view.projectId)}
-            phases={getPhasesForProject(view.projectId)}
-            onPhasesChange={(phases) => updatePhasesForProject(view.projectId, phases)}
-            onCreatePendingPhase={handleCreatePendingPhase}
-            projectHypotheses={projectHypotheses[view.projectId]}
-            projectTerms={projectTerms[view.projectId]}
-            projectMaterials={projectMaterialsMap[view.projectId]}
-          />
+<ProjectDetail
+  projectId={view.projectId}
+  project={projects.find((p) => p.id === view.projectId)}
+  phases={getPhasesForProject(view.projectId)}
+  onPhasesChange={(phases) => updatePhasesForProject(view.projectId, phases)}
+  onCreatePendingPhase={handleCreatePendingPhase}
+  onCreatePendingProjectHypothesis={handleCreatePendingProjectHypothesis}
+  projectHypotheses={projectHypotheses[view.projectId]}
+  projectTerms={projectTerms[view.projectId]}
+  projectMaterials={projectMaterialsMap[view.projectId]}
+  savedGeneratedSuggestions={savedProjectSuggestions[view.projectId]}
+  onSaveSuggestions={(suggestions) => handleSaveProjectSuggestions(view.projectId, suggestions)}
+  />
         )}
         {view.type === "strategy-detail" && (
           <StrategyDetail
