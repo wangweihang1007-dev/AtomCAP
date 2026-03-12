@@ -11,10 +11,10 @@ import {
   PanelLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { HypothesisChecklist, type HypothesisTableItem } from "@/components/pages/hypothesis-checklist"
+import { HypothesisChecklist, type HypothesisTableItem, type HypothesisDetail } from "@/components/pages/hypothesis-checklist"
 import { ProjectOverview } from "@/components/pages/project-overview"
 import { TermSheet, type TermTableItem } from "@/components/pages/term-sheet"
-import { Workflow, type Phase, type PendingPhase } from "@/components/pages/workflow"
+import { Workflow, type Phase, type PendingPhase, type PendingProjectHypothesis, type GeneratedSuggestion } from "@/components/pages/workflow"
 import { ProjectMaterials } from "@/components/pages/project-materials"
 import { type Project } from "@/components/pages/projects-grid"
 import { type StrategyMaterial } from "@/components/pages/strategies-grid"
@@ -54,12 +54,16 @@ interface ProjectDetailProps {
   phases?: Phase[]
   onPhasesChange?: (phases: Phase[]) => void
   onCreatePendingPhase?: (pending: PendingPhase) => void
+  onCreatePendingProjectHypothesis?: (pending: PendingProjectHypothesis) => void
   projectHypotheses?: HypothesisTableItem[]
+  projectHypothesisDetails?: Record<string, HypothesisDetail>
   projectTerms?: TermTableItem[]
   projectMaterials?: StrategyMaterial[]
+  savedGeneratedSuggestions?: GeneratedSuggestion[]
+  onSaveSuggestions?: (suggestions: GeneratedSuggestion[]) => void
 }
 
-export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase, projectHypotheses, projectTerms, projectMaterials }: ProjectDetailProps) {
+export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase, onCreatePendingProjectHypothesis, projectHypotheses, projectHypothesisDetails, projectTerms, projectMaterials, savedGeneratedSuggestions, onSaveSuggestions }: ProjectDetailProps) {
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
   const isNewProject = projectId.startsWith("new-project-")
@@ -148,15 +152,19 @@ export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCr
             phases={phases}
             onPhasesChange={onPhasesChange}
             onCreatePendingPhase={onCreatePendingPhase}
+            onCreatePendingProjectHypothesis={onCreatePendingProjectHypothesis}
             hypothesesCount={projectHypotheses?.length}
             termsCount={projectTerms?.length}
             materialsCount={projectMaterials?.length}
+            savedGeneratedSuggestions={savedGeneratedSuggestions}
+            onSaveSuggestions={onSaveSuggestions}
           />
         ) : activeSubPage === "hypotheses" ? (
           <HypothesisChecklist
             isNewProject={isNewProject}
             project={project}
             inheritedHypotheses={projectHypotheses}
+            extraDetails={projectHypothesisDetails}
           />
         ) : activeSubPage === "terms" ? (
           <TermSheet

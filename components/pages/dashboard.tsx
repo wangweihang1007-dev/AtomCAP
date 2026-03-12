@@ -379,27 +379,25 @@ export function Dashboard() {
             <div className="rounded-xl border border-[#E5E7EB] bg-white p-5">
               <h3 className="font-semibold text-[#111827] mb-1">赛道投资分布</h3>
               <p className="text-sm text-[#6B7280] mb-4">按投资金额占比统计</p>
-              <div className="h-[240px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={trackDistribution}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={2}
-                      dataKey="value"
-                      label={({ name, value }) => `${name} ${value}%`}
-                      labelLine={false}
-                    >
-                      {trackDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value}%`} />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="h-[240px] flex items-center justify-center">
+                <PieChart width={380} height={240}>
+                  <Pie
+                    data={trackDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={({ name, value }) => `${name} ${value}%`}
+                    labelLine={false}
+                  >
+                    {trackDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value}%`} />
+                </PieChart>
               </div>
               <div className="flex flex-wrap gap-3 justify-center mt-2">
                 {trackDistribution.map((item) => (

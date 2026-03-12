@@ -14,13 +14,14 @@ import {
 import { cn } from "@/lib/utils"
 import type { PendingStrategy, PendingHypothesis, PendingTerm, PendingMaterial } from "./strategies-grid"
 import type { PendingProject } from "./projects-grid"
-import type { PendingPhase } from "./workflow"
+import type { PendingPhase, PendingProjectHypothesis } from "./workflow"
 
 type PendingRequest =
   | { type: "strategy"; data: PendingStrategy }
   | { type: "project"; data: PendingProject }
   | { type: "phase"; data: PendingPhase }
   | { type: "hypothesis"; data: PendingHypothesis }
+  | { type: "project-hypothesis"; data: PendingProjectHypothesis }
   | { type: "term"; data: PendingTerm }
   | { type: "material"; data: PendingMaterial }
 
@@ -29,6 +30,7 @@ interface ChangeRequestsProps {
   pendingProjects: PendingProject[]
   pendingPhases: PendingPhase[]
   pendingHypotheses: PendingHypothesis[]
+  pendingProjectHypotheses: PendingProjectHypothesis[]
   pendingTerms: PendingTerm[]
   pendingMaterials: PendingMaterial[]
   onApproveStrategy: (id: string) => void
@@ -39,6 +41,8 @@ interface ChangeRequestsProps {
   onRejectPhase: (id: string) => void
   onApproveHypothesis: (id: string) => void
   onRejectHypothesis: (id: string) => void
+  onApproveProjectHypothesis: (id: string) => void
+  onRejectProjectHypothesis: (id: string) => void
   onApproveTerm: (id: string) => void
   onRejectTerm: (id: string) => void
   onApproveMaterial: (id: string) => void
@@ -50,6 +54,7 @@ export function ChangeRequests({
   pendingProjects,
   pendingPhases,
   pendingHypotheses,
+  pendingProjectHypotheses,
   pendingTerms,
   pendingMaterials,
   onApproveStrategy,
@@ -60,6 +65,8 @@ export function ChangeRequests({
   onRejectPhase,
   onApproveHypothesis,
   onRejectHypothesis,
+  onApproveProjectHypothesis,
+  onRejectProjectHypothesis,
   onApproveTerm,
   onRejectTerm,
   onApproveMaterial,
@@ -76,6 +83,7 @@ export function ChangeRequests({
     ...pendingProjects.map((p) => ({ type: "project" as const, data: p })),
     ...pendingPhases.map((p) => ({ type: "phase" as const, data: p })),
     ...pendingHypotheses.map((h) => ({ type: "hypothesis" as const, data: h })),
+    ...pendingProjectHypotheses.map((h) => ({ type: "project-hypothesis" as const, data: h })),
     ...pendingTerms.map((t) => ({ type: "term" as const, data: t })),
     ...pendingMaterials.map((m) => ({ type: "material" as const, data: m })),
   ].sort((a, b) => new Date(b.data.initiatedAt).getTime() - new Date(a.data.initiatedAt).getTime())
@@ -93,6 +101,7 @@ export function ChangeRequests({
   const projectCount = pendingProjects.length
   const phaseCount = pendingPhases.length
   const hypothesisCount = pendingHypotheses.length
+  const projectHypothesisCount = pendingProjectHypotheses.length
   const termCount = pendingTerms.length
   const materialCount = pendingMaterials.length
 
@@ -110,6 +119,8 @@ export function ChangeRequests({
       onApprovePhase(request.data.id)
     } else if (request.type === "hypothesis") {
       onApproveHypothesis(request.data.id)
+    } else if (request.type === "project-hypothesis") {
+      onApproveProjectHypothesis(request.data.id)
     } else if (request.type === "term") {
       onApproveTerm(request.data.id)
     } else {
@@ -126,6 +137,8 @@ export function ChangeRequests({
       onRejectPhase(request.data.id)
     } else if (request.type === "hypothesis") {
       onRejectHypothesis(request.data.id)
+    } else if (request.type === "project-hypothesis") {
+      onRejectProjectHypothesis(request.data.id)
     } else if (request.type === "term") {
       onRejectTerm(request.data.id)
     } else {
@@ -322,24 +335,25 @@ export function ChangeRequests({
                   <div>
                     <Badge className={cn(
                       "text-[10px]",
-                      request.type === "strategy"
-                        ? "bg-blue-50 text-blue-700 border-blue-200"
-                        : request.type === "project"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : request.type === "hypothesis"
-                            ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : request.type === "term"
-                              ? "bg-violet-50 text-violet-700 border-violet-200"
-                              : request.type === "material"
-                                ? "bg-teal-50 text-teal-700 border-teal-200"
-                                : "bg-purple-50 text-purple-700 border-purple-200"
-                    )}>
-                      {request.type === "strategy" ? "策略"
-                        : request.type === "project" ? "项目"
-                        : request.type === "hypothesis" ? "假设"
-                        : request.type === "term" ? "条款"
-                        : request.type === "material" ? "材料"
-                        : "工作流"}
+  request.type === "strategy"
+  ? "bg-blue-50 text-blue-700 border-blue-200"
+  : request.type === "project"
+  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+  : request.type === "hypothesis" || request.type === "project-hypothesis"
+  ? "bg-amber-50 text-amber-700 border-amber-200"
+  : request.type === "term"
+  ? "bg-violet-50 text-violet-700 border-violet-200"
+  : request.type === "material"
+  ? "bg-teal-50 text-teal-700 border-teal-200"
+  : "bg-purple-50 text-purple-700 border-purple-200"
+  )}>
+  {request.type === "strategy" ? "策略"
+  : request.type === "project" ? "项目"
+  : request.type === "hypothesis" ? "假设"
+  : request.type === "project-hypothesis" ? "项目假设"
+  : request.type === "term" ? "条款"
+  : request.type === "material" ? "材料"
+  : "工作流"}
                     </Badge>
                   </div>
 
@@ -353,18 +367,20 @@ export function ChangeRequests({
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[#111827] truncate">{request.data.changeName}</p>
                     <p className="text-xs text-[#6B7280] truncate">
-                      {request.type === "strategy"
-                        ? `策略类型: ${(request.data as PendingStrategy).strategy.type}`
-                        : request.type === "project"
-                          ? `策略模板: ${(request.data as PendingProject).project.strategyName || "无"}`
-                          : request.type === "hypothesis"
-                            ? `假设方向: ${(request.data as PendingHypothesis).hypothesis.direction}`
-                            : request.type === "term"
-                              ? `条款方向: ${(request.data as PendingTerm).term.direction}`
-                              : request.type === "material"
-                                ? `材料类别: ${(request.data as PendingMaterial).category}`
-                                : `项目: ${(request.data as PendingPhase).projectName}`
-                      }
+  {request.type === "strategy"
+  ? `策略类型: ${(request.data as PendingStrategy).strategy.type}`
+  : request.type === "project"
+  ? `策略模板: ${(request.data as PendingProject).project.strategyName || "无"}`
+  : request.type === "hypothesis"
+  ? `假设方向: ${(request.data as PendingHypothesis).hypothesis.direction}`
+  : request.type === "project-hypothesis"
+  ? `项目: ${(request.data as PendingProjectHypothesis).projectName} / 方向: ${(request.data as PendingProjectHypothesis).hypothesis.direction}`
+  : request.type === "term"
+  ? `条款方向: ${(request.data as PendingTerm).term.direction}`
+  : request.type === "material"
+  ? `材料类别: ${(request.data as PendingMaterial).category}`
+  : `项目: ${(request.data as PendingPhase).projectName}`
+  }
                     </p>
                   </div>
 
