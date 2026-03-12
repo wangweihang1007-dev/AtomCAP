@@ -112,7 +112,7 @@ interface LinkedTerm {
   status: "approved" | "pending" | "rejected"
 }
 
-interface HypothesisDetail {
+export interface HypothesisDetail {
   id: string
   title: string
   qaId: string
@@ -433,9 +433,10 @@ interface HypothesisChecklistProps {
   isNewProject?: boolean
   project?: { strategyId?: string; strategyName?: string }
   inheritedHypotheses?: HypothesisTableItem[]
+  extraDetails?: Record<string, HypothesisDetail>
 }
 
-export function HypothesisChecklist({ isNewProject = false, project, inheritedHypotheses }: HypothesisChecklistProps) {
+export function HypothesisChecklist({ isNewProject = false, project, inheritedHypotheses, extraDetails }: HypothesisChecklistProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
@@ -459,8 +460,10 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
     )
   })
 
-  // Get detail for selected item
-  const selectedDetail = selectedId ? hypothesisDetails[selectedId] : null
+  // Get detail for selected item - check extraDetails first (for newly created hypotheses), then static mock data
+  const selectedDetail = selectedId
+    ? (extraDetails?.[selectedId] ?? hypothesisDetails[selectedId] ?? null)
+    : null
 
   // Handle view detail
   function handleViewDetail(id: string) {
@@ -718,34 +721,42 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
               <div className="border-l-4 border-[#2563EB] p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-[#111827]">投委会审议结果</h3>
-                  <Badge className="bg-[#DCFCE7] text-[#166534] border-[#BBF7D0]">
-                    {selectedDetail.committeeDecision.conclusion}
-                  </Badge>
+                  {selectedDetail.committeeDecision.conclusion ? (
+                    <Badge className="bg-[#DCFCE7] text-[#166534] border-[#BBF7D0]">
+                      {selectedDetail.committeeDecision.conclusion}
+                    </Badge>
+                  ) : null}
                 </div>
 
-                <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
-                  <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.committeeDecision.content}</p>
-                </div>
+                {selectedDetail.committeeDecision.content ? (
+                  <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
+                    <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.committeeDecision.content}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#9CA3AF] mb-4">暂无审议结果</p>
+                )}
 
                 {/* Creator & Reviewers */}
-                <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-4">
-                  <div className="flex items-center gap-1">
-                    <div className="h-5 w-5 rounded-full bg-[#2563EB] flex items-center justify-center">
-                      <span className="text-[8px] text-white">{selectedDetail.committeeDecision.creator.name.slice(0, 1)}</span>
-                    </div>
-                    <span>创建: {selectedDetail.committeeDecision.creator.name}</span>
-                  </div>
-                  <span>审批:</span>
-                  {selectedDetail.committeeDecision.reviewers.map((r, idx) => (
-                    <div key={idx} className="flex items-center gap-1">
-                      <div className="h-5 w-5 rounded-full bg-[#6B7280] flex items-center justify-center">
-                        <span className="text-[8px] text-white">{r.name.slice(0, 1)}</span>
+                {selectedDetail.committeeDecision.creator?.name && (
+                  <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-4">
+                    <div className="flex items-center gap-1">
+                      <div className="h-5 w-5 rounded-full bg-[#2563EB] flex items-center justify-center">
+                        <span className="text-[8px] text-white">{selectedDetail.committeeDecision.creator.name.slice(0, 1)}</span>
                       </div>
-                      <span>{r.name}</span>
+                      <span>创建: {selectedDetail.committeeDecision.creator.name}</span>
                     </div>
-                  ))}
-                  <span>{selectedDetail.committeeDecision.createdAt}</span>
-                </div>
+                    <span>审批:</span>
+                    {selectedDetail.committeeDecision.reviewers.map((r, idx) => (
+                      <div key={idx} className="flex items-center gap-1">
+                        <div className="h-5 w-5 rounded-full bg-[#6B7280] flex items-center justify-center">
+                          <span className="text-[8px] text-white">{r.name.slice(0, 1)}</span>
+                        </div>
+                        <span>{r.name}</span>
+                      </div>
+                    ))}
+                    <span>{selectedDetail.committeeDecision.createdAt}</span>
+                  </div>
+                )}
 
                 {/* Comments */}
                 <div>
@@ -789,34 +800,42 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
               <div className="border-l-4 border-[#8B5CF6] p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-[#111827]">投后验证评估</h3>
-                  <Badge className="bg-[#F3E8FF] text-[#7C3AED] border-[#DDD6FE]">
-                    {selectedDetail.verification.conclusion}
-                  </Badge>
+                  {selectedDetail.verification.conclusion ? (
+                    <Badge className="bg-[#F3E8FF] text-[#7C3AED] border-[#DDD6FE]">
+                      {selectedDetail.verification.conclusion}
+                    </Badge>
+                  ) : null}
                 </div>
 
-                <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
-                  <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.verification.content}</p>
-                </div>
+                {selectedDetail.verification.content ? (
+                  <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
+                    <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.verification.content}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#9CA3AF] mb-4">暂无验证评估</p>
+                )}
 
                 {/* Creator & Reviewers */}
-                <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-4">
-                  <div className="flex items-center gap-1">
-                    <div className="h-5 w-5 rounded-full bg-[#2563EB] flex items-center justify-center">
-                      <span className="text-[8px] text-white">{selectedDetail.verification.creator.name.slice(0, 1)}</span>
-                    </div>
-                    <span>创建: {selectedDetail.verification.creator.name}</span>
-                  </div>
-                  <span>审批:</span>
-                  {selectedDetail.verification.reviewers.map((r, idx) => (
-                    <div key={idx} className="flex items-center gap-1">
-                      <div className="h-5 w-5 rounded-full bg-[#6B7280] flex items-center justify-center">
-                        <span className="text-[8px] text-white">{r.name.slice(0, 1)}</span>
+                {selectedDetail.verification.creator?.name && (
+                  <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-4">
+                    <div className="flex items-center gap-1">
+                      <div className="h-5 w-5 rounded-full bg-[#2563EB] flex items-center justify-center">
+                        <span className="text-[8px] text-white">{selectedDetail.verification.creator.name.slice(0, 1)}</span>
                       </div>
-                      <span>{r.name}</span>
+                      <span>创建: {selectedDetail.verification.creator.name}</span>
                     </div>
-                  ))}
-                  <span>{selectedDetail.verification.createdAt}</span>
-                </div>
+                    <span>审批:</span>
+                    {selectedDetail.verification.reviewers.map((r, idx) => (
+                      <div key={idx} className="flex items-center gap-1">
+                        <div className="h-5 w-5 rounded-full bg-[#6B7280] flex items-center justify-center">
+                          <span className="text-[8px] text-white">{r.name.slice(0, 1)}</span>
+                        </div>
+                        <span>{r.name}</span>
+                      </div>
+                    ))}
+                    <span>{selectedDetail.verification.createdAt}</span>
+                  </div>
+                )}
 
                 {/* Comments */}
                 <div>
@@ -843,8 +862,11 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
               <h2 className="text-base font-semibold text-[#111827]">该假设所支持的条款</h2>
             </div>
             <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-              <div className="space-y-3">
-                {selectedDetail.linkedTerms.map((term) => (
+              {selectedDetail.linkedTerms.length === 0 ? (
+                <p className="text-sm text-[#9CA3AF]">暂无关联条款</p>
+              ) : (
+                <div className="space-y-3">
+                  {selectedDetail.linkedTerms.map((term) => (
                   <div key={term.id} className="flex items-center justify-between p-3 bg-[#F9FAFB] rounded-lg">
                     <div className="flex items-center gap-3">
                       <FileCheck className="h-4 w-4 text-[#6B7280]" />
@@ -866,6 +888,7 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
                   </div>
                 ))}
               </div>
+              )}
             </div>
           </div>
         </div>
