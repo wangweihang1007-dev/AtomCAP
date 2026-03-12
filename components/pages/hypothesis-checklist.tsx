@@ -355,7 +355,7 @@ const aiInfrastructureHypotheses: HypothesisTableItem[] = [
     owner: "李四",
     createdAt: "2024-01-12",
     updatedAt: "2024-02-18",
-    status: "verified",
+    status: "pending",
   },
   {
     id: "ai-h3",
@@ -365,7 +365,7 @@ const aiInfrastructureHypotheses: HypothesisTableItem[] = [
     owner: "王五",
     createdAt: "2024-01-15",
     updatedAt: "2024-02-20",
-    status: "verified",
+    status: "pending",
   },
   {
     id: "ai-h4",
@@ -385,7 +385,7 @@ const aiInfrastructureHypotheses: HypothesisTableItem[] = [
     owner: "李四",
     createdAt: "2024-01-20",
     updatedAt: "2024-02-25",
-    status: "risky",
+    status: "pending",
   },
   {
     id: "ai-h6",
@@ -532,7 +532,7 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
               <div key={vp.id} className="bg-white rounded-xl border border-[#E5E7EB] mb-4 overflow-hidden">
                 <div className="border-l-4 border-[#22C55E] p-5">
                   <h3 className="font-semibold text-[#22C55E] mb-3">{vp.title}</h3>
-                  
+
                   {/* Evidence */}
                   <div className="mb-4">
                     <p className="text-xs text-[#6B7280] mb-1">论据支持</p>
@@ -617,7 +617,7 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
               <div key={rp.id} className="bg-white rounded-xl border border-[#E5E7EB] mb-4 overflow-hidden">
                 <div className="border-l-4 border-[#EF4444] p-5">
                   <h3 className="font-semibold text-[#EF4444] mb-3">{rp.title}</h3>
-                  
+
                   {/* Evidence */}
                   <div className="mb-4">
                     <p className="text-xs text-[#6B7280] mb-1">论据支持</p>
@@ -706,7 +706,7 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
                     {selectedDetail.committeeDecision.conclusion}
                   </Badge>
                 </div>
-                
+
                 <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
                   <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.committeeDecision.content}</p>
                 </div>
@@ -777,7 +777,7 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
                     {selectedDetail.verification.conclusion}
                   </Badge>
                 </div>
-                
+
                 <div className="p-3 bg-[#F9FAFB] rounded-lg mb-4">
                   <p className="text-sm text-[#374151] leading-relaxed">{selectedDetail.verification.content}</p>
                 </div>
@@ -839,7 +839,7 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
                     </div>
                     <Badge className={cn(
                       "text-xs",
-                      term.status === "approved" 
+                      term.status === "approved"
                         ? "bg-[#DCFCE7] text-[#166534]"
                         : term.status === "rejected"
                           ? "bg-[#FEE2E2] text-[#991B1B]"
@@ -926,8 +926,8 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
             </thead>
             <tbody>
               {filteredData.map((item, index) => (
-                <tr 
-                  key={item.id} 
+                <tr
+                  key={item.id}
                   className={cn(
                     "border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors",
                     index % 2 === 1 && "bg-[#F9FAFB]"
@@ -975,7 +975,7 @@ export function HypothesisChecklist({ isNewProject = false, project, inheritedHy
               ))}
             </tbody>
           </table>
-          
+
           {filteredData.length === 0 && (
             <div className="py-12 text-center">
               <ListChecks className="mx-auto h-12 w-12 text-[#D1D5DB]" />
