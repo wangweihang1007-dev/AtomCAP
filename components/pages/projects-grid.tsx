@@ -213,6 +213,8 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
   const [uploadCurrentFolderId, setUploadCurrentFolderId] = useState<string | null>(null)
   const [uploadState, setUploadState] = useState<"idle" | "uploading">("idle")
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [materialDescription, setMaterialDescription] = useState("")
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
   const [newTags, setNewTags] = useState("")
 
   const filteredProjects = projects.filter(
@@ -275,6 +277,22 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
     setUploadCurrentFolderId(null)
     setUploadState("idle")
     setUploadProgress(0)
+    setMaterialDescription("")
+    setIsGeneratingDescription(false)
+  }
+
+  // Mock file descriptions for AI generation
+  const mockFileDescriptions: Record<string, string> = {
+    "f16": "闫俊杰的个人简历，详细介绍了其在人工智能领域的研究经历、技术专长及项目成果，可用于评估核心技术团队成员的专业能力和行业背景。",
+    "f17": "张伟的个人简历，包含教育背景、工作经历及技术技能说明，可作为团队能力评估的参考材料。",
+    "f18": "李四的个人简历，涵盖职业发展历程及专业资质证书信息。",
+    "f1": "Gartner发布的2024年度生成式AI与大模型行业研究报告，涵盖全球市场规模预测、主要玩家格局分析、技术成熟度曲线及应用落地趋势，可作为策略市场规模假设的权威数据支撑依据。",
+    "f2": "IDC发布的大模型行业深度分析报告，包含技术演进路径和商业化前景评估。",
+    "f3": "麦肯锡对生成式AI市场规模的预测分析，涵盖各行业应用场景。",
+    "f4": "AI行业竞争格局分析演示文档，包含主要竞争对手对比。",
+    "f13": "AI投融资趋势报告，涵盖投资热点和估值趋势分析。",
+    "f14": "估值数据库，包含行业主要公司的估值数据和财务指标。",
+    "f15": "VC投资案例汇总，收录近期AI领域重点投资案例。",
   }
 
   function openUploadDialog() {
@@ -282,16 +300,52 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
     setUploadCurrentFolderId(null)
     setUploadState("idle")
     setUploadProgress(0)
+    setMaterialDescription("")
+    setIsGeneratingDescription(false)
     setIsUploadOpen(true)
   }
 
   function handleUploadToggleFile(fileId: string) {
     setUploadSelectedFiles((prev) => {
       const next = new Set(prev)
-      if (next.has(fileId)) next.delete(fileId)
-      else next.add(fileId)
+      if (next.has(fileId)) {
+        next.delete(fileId)
+        // Clear description if no files selected
+        if (next.size === 0) {
+          setMaterialDescription("")
+        } else {
+          // Generate description for remaining files
+          generateDescriptionForFiles(next)
+        }
+      } else {
+        next.add(fileId)
+        // Generate description for newly selected file
+        generateDescriptionForFiles(next)
+      }
       return next
     })
+  }
+
+  function generateDescriptionForFiles(fileIds: Set<string>) {
+    setIsGeneratingDescription(true)
+    setMaterialDescription("")
+    setTimeout(() => {
+      const descriptions: string[] = []
+      fileIds.forEach((id) => {
+        if (mockFileDescriptions[id]) {
+          descriptions.push(mockFileDescriptions[id])
+        } else {
+          // Generate a generic description based on file name
+          const allFiles = mockLocalFolders.flatMap((f) => f.files)
+          const file = allFiles.find((f) => f.id === id)
+          if (file) {
+            descriptions.push(`${file.name}：该文件可作为项目研究和分析的参考材料。`)
+          }
+        }
+      })
+      setMaterialDescription(descriptions.join("\n\n"))
+      setIsGeneratingDescription(false)
+    }, 1200)
   }
 
   function handleUploadConfirm() {
@@ -664,6 +718,23 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
             </div>
           ) : (
             <div className="space-y-4 py-2">
+              {/* Material Description Section */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-[#374151]">材料简介</Label>
+                <div className="rounded-lg border border-[#E5E7EB] bg-white min-h-[80px] p-3">
+                  {isGeneratingDescription ? (
+                    <div className="flex items-center gap-2 text-sm text-[#6B7280]">
+                      <Loader2 className="h-4 w-4 animate-spin text-[#2563EB]" />
+                      <span>AI正在生成材料简介...</span>
+                    </div>
+                  ) : materialDescription ? (
+                    <p className="text-sm text-[#374151] leading-relaxed whitespace-pre-line">{materialDescription}</p>
+                  ) : (
+                    <p className="text-sm text-[#9CA3AF]">选择文件后，AI将自动生成材料简介</p>
+                  )}
+                </div>
+              </div>
+
               {/* File browser */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-[#374151]">选择文件</Label>
