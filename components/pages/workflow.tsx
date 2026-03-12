@@ -479,7 +479,7 @@ export function Workflow({
 
   // Mock available project materials
   const availableMaterials: ProjectMaterialOption[] = [
-    { id: "m1", name: "专利清单及技术白皮书", format: "PDF" },
+    { id: "m1", name: "闫俊杰_CV", format: "PDF" },
     { id: "m2", name: "核心团队履历及期权安排", format: "PDF" },
     { id: "m3", name: "行业研究报告_2024Q4", format: "PDF" },
     { id: "m4", name: "竞品市场份额分析", format: "XLSX" },
@@ -798,6 +798,60 @@ export function Workflow({
         // Generate mock suggestions with linked items - 5 suggestions
         setTimeout(() => {
           const suggestions: GeneratedSuggestion[] = [
+            {
+              id: "gs0",
+              title: "补充创始人品质假设",
+              content: "当前假设清单缺少对创始人能力与品质的系统性论证与支撑。建议增加关于创始人技术水平和创始人商业经验等方面的假设，以更全面评估投资标的的成功概率。",
+              linkedTerms: [
+                { id: "t1", name: "创始人股权分配细则" },
+                { id: "t2", name: "创始人权限划分" },
+              ],
+              linkedMaterials: [
+                { id: "m1", name: "闫俊杰_CV" },
+                { id: "m2", name: "核心团队履历及期权安排" },
+              ],
+              hypotheses: [
+                {
+                  id: "sh0-1",
+                  direction: "团队能力",
+                  category: "创始人",
+                  name: "创始人具有扎实的人工智能学术背景。",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp1", title: "专利布局完善，覆盖领域广。", evidenceDescription: "公司在核心技术领域拥有20+项专利", evidenceMaterialIds: ["m1"], analysisContent: "专利覆盖核心算法、模型架构和数据处理流程，形成完整的技术护城河。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp1", title: "专利维护成本较高。", evidenceDescription: "专利维护需要持续投入", evidenceMaterialIds: ["m1"], analysisContent: "需评估专利维护成本对运营的影响。" },
+                  ],
+                },
+                {
+                  id: "sh0-2",
+                  direction: "团队能力",
+                  category: "创始人",
+                  name: "创始人具备丰富的AI产品商业化经验。",
+                  isExisting: true,
+                  valuePoints: [
+                    { id: "vp3", title: "迭代速度快", evidenceDescription: "产品更新周期短于行业平均", evidenceMaterialIds: ["m1", "m3"], analysisContent: "快速迭代能力体现团队执行力和技术实力。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp3", title: "技术迭代风险", evidenceDescription: "AI领域技术更新速度快", evidenceMaterialIds: [], analysisContent: "需持续关注竞品技术动态，评估公司技术迭代能力。" },
+                  ],
+                },
+                {
+                  id: "sh0-3",
+                  direction: "团队能力",
+                  category: "创始人",
+                  name: "创始人具备出较强的团队凝聚力。",
+                  isExisting: false,
+                  valuePoints: [
+                    { id: "vp3", title: "迭代速度快", evidenceDescription: "产品更新周期短于行业平均", evidenceMaterialIds: ["m1", "m3"], analysisContent: "快速迭代能力体现团队执行力和技术实力。" },
+                  ],
+                  riskPoints: [
+                    { id: "rp3", title: "技术迭代风险", evidenceDescription: "AI领域技术更新速度快", evidenceMaterialIds: [], analysisContent: "需持续关注竞品技术动态，评估公司技术迭代能力。" },
+                  ],
+                },
+              ],
+            },
             {
               id: "gs1",
               title: "补充技术壁垒假设",
