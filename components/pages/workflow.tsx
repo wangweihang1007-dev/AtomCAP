@@ -884,19 +884,24 @@ export function Workflow({
     // For ai-chat, open full page view
     if (type === "ai-chat") {
       setFullPageView("ai-chat")
-      setChatMessages([
-        {
-          role: "assistant",
-          content: "您好！我是 AtomCAP AI 助手 👋\n\n我可以基于当前阶段的项目数据，帮您分析进展情况、解答疑问或给出操作建议。请问有什么可以帮您？",
-          suggestedQuestions: [
-            "帮我总结一下当前的项目进展情况",
-            "当前阶段的假设验证情况如何？",
-            "当前阶段还缺少哪些材料？",
-          ],
+      // Only set initial message if chat is empty (preserve existing conversation)
+      setChatMessages((prev) => {
+        if (prev.length === 0) {
+          return [
+            {
+              role: "assistant",
+              content: "您好！我是 AtomCAP AI 助手 👋\n\n我可以基于当前阶段的项目数据，帮您分析进展情况、解答疑问或给出操作建议。请问有什么可以帮您？",
+              suggestedQuestions: [
+                "帮我总结一下当前的项目进展情况",
+                "当前阶段的假设验证情况如何？",
+                "当前阶段还缺少哪些材料？",
+              ],
+            }
+          ]
         }
-      ])
+        return prev
+      })
       setIsChatThinking(false)
-      setChatUserMessageCount(0)
       return
     }
 
@@ -1211,7 +1216,7 @@ export function Workflow({
               terms: [
                 {
                   id: "st2-1",
-                  direction: "经济性条款",
+                  direction: "经济��条款",
                   category: "反稀释条款",
                   name: "采用加权平均反稀释保护机制",
                   isExisting: false,
@@ -1844,7 +1849,7 @@ export function Workflow({
 
   function handleCloseSidebar() {
     setActiveSidebar(null)
-    setChatMessages([])
+    // Don't clear chat messages - preserve conversation during session
     setChatInput("")
   }
 
@@ -1908,7 +1913,7 @@ ${logs}
 
 如需查看具体假设列表，请前往左侧导航的"假设清单"页面。`,
         suggestedQuestions: [
-          "帮我生成本阶段的项目���展汇报文档",
+          "帮我生成本阶段的项������展汇报文档",
           "当前阶段还缺少哪些材料？",
           "帮我总结一下当前的项目进展情况",
         ],
@@ -1969,7 +1974,7 @@ ${logs}
         { id: "cs2", label: "检索假设验证状态与覆盖情况...", status: "waiting" },
         { id: "cs3", label: "分析条款谈判进度与关键节点...", status: "waiting" },
         { id: "cs4", label: "统计材料收集完整性...", status: "waiting" },
-        { id: "cs5", label: "汇总近期动态与操作记录...", status: "waiting" },
+        { id: "cs5", label: "汇总近期动态与操作记��...", status: "waiting" },
         { id: "cs6", label: "生成项目进展总结报告...", status: "waiting" },
       ]
     }
