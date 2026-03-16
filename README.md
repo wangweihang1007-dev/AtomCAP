@@ -714,6 +714,6 @@ interface LinkedHypothesis {
 ## 技术栈
 
 - **前端框架**: React + TypeScript + Tailwind CSS
-- **后端框架**: SpringBoot + Java + Mybatis/Spring Data JDBC
+- **后端框架**: 按照后端同学比较熟悉的技术栈，暂定Django + Python + Mybatis
 - multirepo架构，前后端分离开发，两个仓库，前端项目名：**AtomCAP**，后端项目名**AtomCAP-server**
 
