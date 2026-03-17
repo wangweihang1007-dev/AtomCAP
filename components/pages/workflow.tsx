@@ -1596,7 +1596,7 @@ export function Workflow({
               title: "补充创始人品质假设",
               content: "当前假设清单缺少对创始人能力与品质的系统性论证与支撑。建议增加关于创始人技术水平和创始人商业经验等方面的假设，以更全面评估投资标的的成功概率。",
               linkedTerms: [
-                { id: "t1", name: "创始人股权��配细则" },
+                { id: "t1", name: "创始人股权分配细则" },
                 { id: "t2", name: "创始人权限划分" },
               ],
               linkedMaterials: [
@@ -2788,7 +2788,7 @@ ${logs}
                         <div className={cn(
                           "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300",
                           step.status === "completed" ? "bg-emerald-100" :
-                          step.status === "active" ? "bg-emerald-500" : "bg-[#F3F4F6]"
+                            step.status === "active" ? "bg-emerald-500" : "bg-[#F3F4F6]"
                         )}>
                           {step.status === "completed" ? (
                             <Check className="h-4 w-4 text-emerald-600" />
@@ -2801,7 +2801,7 @@ ${logs}
                         <span className={cn(
                           "text-sm transition-colors",
                           step.status === "completed" ? "text-emerald-600" :
-                          step.status === "active" ? "text-[#111827] font-medium" : "text-[#9CA3AF]"
+                            step.status === "active" ? "text-[#111827] font-medium" : "text-[#9CA3AF]"
                         )}>
                           {step.label}
                         </span>
@@ -3164,7 +3164,7 @@ ${logs}
                         <div className={cn(
                           "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300",
                           step.status === "completed" ? "bg-amber-100" :
-                          step.status === "active" ? "bg-amber-500" : "bg-[#F3F4F6]"
+                            step.status === "active" ? "bg-amber-500" : "bg-[#F3F4F6]"
                         )}>
                           {step.status === "completed" ? (
                             <Check className="h-4 w-4 text-amber-600" />
@@ -3177,7 +3177,7 @@ ${logs}
                         <span className={cn(
                           "text-sm transition-colors",
                           step.status === "completed" ? "text-amber-600" :
-                          step.status === "active" ? "text-[#111827] font-medium" : "text-[#9CA3AF]"
+                            step.status === "active" ? "text-[#111827] font-medium" : "text-[#9CA3AF]"
                         )}>
                           {step.label}
                         </span>
@@ -3483,7 +3483,7 @@ ${logs}
                         <div className={cn(
                           "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300",
                           step.status === "completed" ? "bg-violet-100" :
-                          step.status === "active" ? "bg-violet-500" : "bg-[#F3F4F6]"
+                            step.status === "active" ? "bg-violet-500" : "bg-[#F3F4F6]"
                         )}>
                           {step.status === "completed" ? (
                             <Check className="h-4 w-4 text-violet-600" />
@@ -3496,7 +3496,7 @@ ${logs}
                         <span className={cn(
                           "text-sm transition-colors",
                           step.status === "completed" ? "text-violet-600" :
-                          step.status === "active" ? "text-[#111827] font-medium" : "text-[#9CA3AF]"
+                            step.status === "active" ? "text-[#111827] font-medium" : "text-[#9CA3AF]"
                         )}>
                           {step.label}
                         </span>
@@ -3684,7 +3684,7 @@ ${logs}
                         {/* Docx icon */}
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2563EB]">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" />
                           </svg>
                         </div>
                         {/* File info */}
@@ -3700,7 +3700,7 @@ ${logs}
                           title="下载文件"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
                           </svg>
                         </a>
                       </div>
@@ -3747,7 +3747,7 @@ ${logs}
                         <div className={cn(
                           "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all duration-300",
                           step.status === "completed" ? "bg-violet-100" :
-                          step.status === "active" ? "bg-violet-500" : "bg-[#F3F4F6]"
+                            step.status === "active" ? "bg-violet-500" : "bg-[#F3F4F6]"
                         )}>
                           {step.status === "completed" ? (
                             <Check className="h-3 w-3 text-violet-600" />
@@ -3760,7 +3760,7 @@ ${logs}
                         <span className={cn(
                           "text-xs transition-colors",
                           step.status === "completed" ? "text-violet-600" :
-                          step.status === "active" ? "text-[#111827] font-medium" : "text-[#C4C9D4]"
+                            step.status === "active" ? "text-[#111827] font-medium" : "text-[#C4C9D4]"
                         )}>
                           {step.label}
                         </span>

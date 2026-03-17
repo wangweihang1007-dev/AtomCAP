@@ -187,7 +187,7 @@ export function ChangeRequests({
 
   return (
     <div className="h-full overflow-auto bg-[#F3F4F6]">
-      <div className="mx-auto max-w-6xl px-8 py-8">
+      <div className="px-8 py-8">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -374,30 +374,30 @@ export function ChangeRequests({
                   <div>
                     <Badge className={cn(
                       "text-[10px]",
-  request.type === "strategy"
-  ? "bg-blue-50 text-blue-700 border-blue-200"
-  : request.type === "project"
-  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-  : request.type === "hypothesis" || request.type === "project-hypothesis" || request.type === "committee-decision"
-  ? "bg-amber-50 text-amber-700 border-amber-200"
-  : request.type === "term" || request.type === "project-term"
-  ? "bg-violet-50 text-violet-700 border-violet-200"
-  : request.type === "material"
-  ? "bg-teal-50 text-teal-700 border-teal-200"
-  : request.type === "project-material"
-  ? "bg-amber-50 text-amber-700 border-amber-200"
-  : "bg-purple-50 text-purple-700 border-purple-200"
-  )}>
-  {request.type === "strategy" ? "策略"
-  : request.type === "project" ? "项目"
-  : request.type === "hypothesis" ? "假设"
-  : request.type === "project-hypothesis" ? "项目假设"
-  : request.type === "committee-decision" ? "审议结果"
-  : request.type === "term" ? "条款"
-  : request.type === "project-term" ? "项目条款"
-  : request.type === "material" ? "材料"
-  : request.type === "project-material" ? "项目材料"
-  : "工作流"}
+                      request.type === "strategy"
+                        ? "bg-blue-50 text-blue-700 border-blue-200"
+                        : request.type === "project"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : request.type === "hypothesis" || request.type === "project-hypothesis" || request.type === "committee-decision"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : request.type === "term" || request.type === "project-term"
+                              ? "bg-violet-50 text-violet-700 border-violet-200"
+                              : request.type === "material"
+                                ? "bg-teal-50 text-teal-700 border-teal-200"
+                                : request.type === "project-material"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                                  : "bg-purple-50 text-purple-700 border-purple-200"
+                    )}>
+                      {request.type === "strategy" ? "策略"
+                        : request.type === "project" ? "项目"
+                          : request.type === "hypothesis" ? "假设"
+                            : request.type === "project-hypothesis" ? "项目假设"
+                              : request.type === "committee-decision" ? "审议结果"
+                                : request.type === "term" ? "条款"
+                                  : request.type === "project-term" ? "项目条款"
+                                    : request.type === "material" ? "材料"
+                                      : request.type === "project-material" ? "项目材料"
+                                        : "工作流"}
                     </Badge>
                   </div>
 
@@ -411,26 +411,26 @@ export function ChangeRequests({
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[#111827] truncate">{request.data.changeName}</p>
                     <p className="text-xs text-[#6B7280] truncate">
-  {request.type === "strategy"
-  ? `策略类型: ${(request.data as PendingStrategy).strategy.type}`
-  : request.type === "project"
-  ? `策略模板: ${(request.data as PendingProject).project.strategyName || "无"}`
-  : request.type === "hypothesis"
-  ? `假设方向: ${(request.data as PendingHypothesis).hypothesis.direction}`
-  : request.type === "project-hypothesis"
-  ? `项目: ${(request.data as PendingProjectHypothesis).projectName} / 方向: ${(request.data as PendingProjectHypothesis).hypothesis.direction}`
-  : request.type === "committee-decision"
-  ? `项目: ${(request.data as PendingCommitteeDecision).projectName} / 假设: ${(request.data as PendingCommitteeDecision).hypothesisName}`
-  : request.type === "term"
-  ? `条款方向: ${(request.data as PendingTerm).term.direction}`
-  : request.type === "project-term"
-  ? `项目: ${(request.data as PendingProjectTerm).projectName} / 方向: ${(request.data as PendingProjectTerm).term.direction}`
-  : request.type === "material"
-  ? `材料类别: ${(request.data as PendingMaterial).category}`
-  : request.type === "project-material"
-  ? `项目: ${(request.data as PendingProjectMaterial).projectName} / 分类: ${(request.data as PendingProjectMaterial).material.category}`
-  : `项目: ${(request.data as PendingPhase).projectName}`
-  }
+                      {request.type === "strategy"
+                        ? `策略类型: ${(request.data as PendingStrategy).strategy.type}`
+                        : request.type === "project"
+                          ? `策略模板: ${(request.data as PendingProject).project.strategyName || "无"}`
+                          : request.type === "hypothesis"
+                            ? `假设方向: ${(request.data as PendingHypothesis).hypothesis.direction}`
+                            : request.type === "project-hypothesis"
+                              ? `项目: ${(request.data as PendingProjectHypothesis).projectName} / 方向: ${(request.data as PendingProjectHypothesis).hypothesis.direction}`
+                              : request.type === "committee-decision"
+                                ? `项目: ${(request.data as PendingCommitteeDecision).projectName} / 假设: ${(request.data as PendingCommitteeDecision).hypothesisName}`
+                                : request.type === "term"
+                                  ? `条款方向: ${(request.data as PendingTerm).term.direction}`
+                                  : request.type === "project-term"
+                                    ? `项目: ${(request.data as PendingProjectTerm).projectName} / 方向: ${(request.data as PendingProjectTerm).term.direction}`
+                                    : request.type === "material"
+                                      ? `材料类别: ${(request.data as PendingMaterial).category}`
+                                      : request.type === "project-material"
+                                        ? `项目: ${(request.data as PendingProjectMaterial).projectName} / 分类: ${(request.data as PendingProjectMaterial).material.category}`
+                                        : `项目: ${(request.data as PendingPhase).projectName}`
+                      }
                     </p>
                   </div>
 
@@ -469,21 +469,21 @@ export function ChangeRequests({
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => handleApprove(request)}
-                      className="flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                      className="flex items-center gap-1 rounded-lg bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100 whitespace-nowrap"
                     >
                       <Check className="h-3.5 w-3.5" />
                       接受
                     </button>
                     <button
                       onClick={() => handleReject(request)}
-                      className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
+                      className="flex items-center gap-1 rounded-lg bg-red-50 px-4 py-3 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 whitespace-nowrap"
                     >
                       <X className="h-3.5 w-3.5" />
                       拒绝
                     </button>
                     <button
                       onClick={() => handleViewDetail(request)}
-                      className="flex items-center gap-1 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                      className="flex items-center gap-1 rounded-lg bg-gray-50 px-4 py-3 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 whitespace-nowrap"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       详情
@@ -529,14 +529,14 @@ export function ChangeRequests({
                   )}>
                     {selectedRequest.type === "strategy" ? "策略"
                       : selectedRequest.type === "project" ? "项目"
-                      : selectedRequest.type === "hypothesis" ? "假设"
-                      : selectedRequest.type === "project-hypothesis" ? "项目假设"
-                      : selectedRequest.type === "committee-decision" ? "审议结果"
-                      : selectedRequest.type === "term" ? "条款"
-                      : selectedRequest.type === "project-term" ? "项目条款"
-                      : selectedRequest.type === "material" ? "材料"
-                      : selectedRequest.type === "project-material" ? "项目材料"
-                      : "工作流"}
+                        : selectedRequest.type === "hypothesis" ? "假设"
+                          : selectedRequest.type === "project-hypothesis" ? "项目假设"
+                            : selectedRequest.type === "committee-decision" ? "审议结果"
+                              : selectedRequest.type === "term" ? "条款"
+                                : selectedRequest.type === "project-term" ? "项目条款"
+                                  : selectedRequest.type === "material" ? "材料"
+                                    : selectedRequest.type === "project-material" ? "项目材料"
+                                      : "工作流"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">

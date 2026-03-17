@@ -202,7 +202,7 @@ export function StrategyHypotheses({
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
   
-  // 弹窗创建表单状态
+  // 弹窗创建表单���态
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formTitle, setFormTitle] = useState("")
   const [formDirection, setFormDirection] = useState("")
@@ -427,7 +427,7 @@ export function StrategyHypotheses({
 
   return (
     <div className="h-full overflow-auto bg-[#F9FAFB]">
-      <div className="mx-auto max-w-7xl px-6 py-6">
+      <div className="px-6 py-6">
         {/* 赛道策略继承提示 */}
         {inheritedFromParent && showInheritBanner && (
           <div className="mb-4 flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3">

@@ -487,7 +487,7 @@ export function StrategyTerms({
 
   return (
     <div className="h-full overflow-auto bg-[#F9FAFB]">
-      <div className="mx-auto max-w-7xl px-6 py-6">
+      <div className="px-6 py-6">
         {/* 赛道策略继承提示 */}
         {inheritedFromParent && showInheritBanner && (
           <div className="mb-4 flex items-center gap-2 rounded-lg bg-violet-50 border border-violet-200 px-4 py-3">

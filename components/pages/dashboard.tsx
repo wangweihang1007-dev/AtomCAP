@@ -213,7 +213,7 @@ export function Dashboard() {
 
   return (
     <div className="h-full overflow-auto bg-[#F3F4F6]">
-      <div className="mx-auto max-w-7xl px-6 py-6 space-y-6">
+      <div className="px-6 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -305,8 +305,8 @@ export function Dashboard() {
                   <p className="text-xl font-bold text-[#111827]">{efficiencyMetrics.avgWorkHours}<span className="text-sm font-normal text-[#6B7280] ml-1">小时</span></p>
                   <span className={cn(
                     "text-xs px-1.5 py-0.5 rounded",
-                    efficiencyMetrics.avgWorkHoursChange < 0 
-                      ? "bg-emerald-50 text-emerald-600" 
+                    efficiencyMetrics.avgWorkHoursChange < 0
+                      ? "bg-emerald-50 text-emerald-600"
                       : "bg-red-50 text-red-600"
                   )}>
                     {efficiencyMetrics.avgWorkHoursChange > 0 ? "+" : ""}{efficiencyMetrics.avgWorkHoursChange}%
@@ -319,8 +319,8 @@ export function Dashboard() {
                   <p className="text-lg font-bold text-[#111827]">{efficiencyMetrics.invalidDueDiligenceRate}%</p>
                   <span className={cn(
                     "text-xs px-1.5 py-0.5 rounded",
-                    efficiencyMetrics.invalidDueDiligenceChange < 0 
-                      ? "bg-emerald-50 text-emerald-600" 
+                    efficiencyMetrics.invalidDueDiligenceChange < 0
+                      ? "bg-emerald-50 text-emerald-600"
                       : "bg-red-50 text-red-600"
                   )}>
                     {efficiencyMetrics.invalidDueDiligenceChange > 0 ? "+" : ""}{efficiencyMetrics.invalidDueDiligenceChange}%
@@ -380,7 +380,7 @@ export function Dashboard() {
               <h3 className="font-semibold text-[#111827] mb-1">赛道投资分布</h3>
               <p className="text-sm text-[#6B7280] mb-4">按投资金额占比统计</p>
               <div className="h-[240px] flex items-center justify-center">
-                <PieChart width={380} height={240}>
+                <PieChart width={450} height={240}>
                   <Pie
                     data={trackDistribution}
                     cx="50%"
@@ -419,7 +419,7 @@ export function Dashboard() {
                   投决: { label: "投决", color: "#7C3AED" },
                   退出: { label: "退出", color: "#059669" },
                 }}
-                className="h-[240px]"
+                className="h-[240px] w-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={projectTrend} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -449,13 +449,13 @@ export function Dashboard() {
                   industryP50: { label: "行业P50", color: "#9CA3AF" },
                   industryP75: { label: "行业P75", color: "#D1D5DB" },
                 }}
-                className="h-[240px]"
+                className="h-[240px] w-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={benchmarkData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <LineChart data={benchmarkData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="quarter" tick={{ fontSize: 12, fill: "#6B7280" }} axisLine={{ stroke: "#E5E7EB" }} />
-                    <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} axisLine={{ stroke: "#E5E7EB" }} unit="%" />
+                    <XAxis dataKey="quarter" tick={{ fontSize: 12, fill: "#6B7280" }} axisLine={{ stroke: "#E5E7EB" }} padding={{ left: 30, right: 30 }} />
+                    <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} axisLine={{ stroke: "#E5E7EB" }} unit="%" width={40} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
                     <Line type="monotone" dataKey="ourIRR" stroke="#2563EB" strokeWidth={2} dot={{ fill: "#2563EB" }} name="本基金IRR" />
@@ -476,9 +476,9 @@ export function Dashboard() {
                     <div className={cn(
                       "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
                       index === 0 ? "bg-amber-100 text-amber-700" :
-                      index === 1 ? "bg-gray-200 text-gray-600" :
-                      index === 2 ? "bg-orange-100 text-orange-700" :
-                      "bg-gray-100 text-gray-500"
+                        index === 1 ? "bg-gray-200 text-gray-600" :
+                          index === 2 ? "bg-orange-100 text-orange-700" :
+                            "bg-gray-100 text-gray-500"
                     )}>
                       {index + 1}
                     </div>
@@ -510,7 +510,7 @@ export function Dashboard() {
               {pendingDecisions.filter(d => d.urgency === "urgent").length} 项紧急
             </Badge>
           </div>
-          
+
           <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
             <table className="w-full">
               <thead className="bg-[#F9FAFB]">

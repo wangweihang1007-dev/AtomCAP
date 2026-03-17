@@ -380,7 +380,7 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
 
   return (
     <div className="h-full overflow-auto bg-[#F3F4F6]">
-      <div className="mx-auto max-w-7xl px-8 py-8">
+      <div className="px-8 py-8">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">

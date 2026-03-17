@@ -83,7 +83,7 @@ export function AppTopbar({ activeNav, onNavigate }: AppTopbarProps) {
           className={cn(
             "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
             activeNav === "change-requests"
-              ? "bg-[#7C3AED] text-white"
+              ? "bg-[#2563EB] text-white"
               : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#CBD5E1]"
           )}
         >

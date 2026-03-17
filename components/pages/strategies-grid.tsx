@@ -289,7 +289,7 @@ interface StrategiesGridProps {
 export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrategy, onCreatePending }: StrategiesGridProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  
+
   // Form state
   const [newName, setNewName] = useState("")
   const [newDescription, setNewDescription] = useState("")
@@ -338,7 +338,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
       id: `pending-${Date.now()}`,
       strategy: newStrategy,
       changeId: `CR-${Date.now().toString().slice(-6)}`,
-      changeName: `新创策略: ${newName.trim()}`,
+      changeName: `新建策略: ${newName.trim()}`,
       initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
       initiatedAt: new Date().toISOString().split("T")[0],
       reviewers: [
@@ -363,7 +363,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
 
   return (
     <div className="h-full overflow-auto bg-[#F3F4F6]">
-      <div className="mx-auto max-w-7xl px-8 py-8">
+      <div className="px-8 py-8">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -391,7 +391,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
               className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
             >
               <Plus className="h-4 w-4" />
-              新创策略
+              新建策略
             </button>
           </div>
         </div>
@@ -476,7 +476,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[#111827]">新创策略</DialogTitle>
+            <DialogTitle className="text-lg font-semibold text-[#111827]">新建策略</DialogTitle>
             <DialogDescription className="text-sm text-[#6B7280]">
               创建一个新的投资策略，用于管理和跟踪特定领域的投资项目
             </DialogDescription>
