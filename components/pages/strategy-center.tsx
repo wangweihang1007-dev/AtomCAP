@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Briefcase, BookOpen } from "lucide-react"
+import { Briefcase, BookOpen, FileSearch } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   StrategiesGrid,
@@ -9,17 +9,17 @@ import {
   type PendingStrategy,
 } from "@/components/pages/strategies-grid"
 import { ConsultationCenter } from "@/components/pages/consultation-center"
+import { ResearchCenter } from "@/components/pages/research-center"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type SubPage = "strategies" | "consultation"
+type SubPage = "consultation" | "research" | "strategies"
 
 interface StrategyCenterProps {
   strategies: Strategy[]
   onStrategiesChange: (strategies: Strategy[]) => void
   onSelectStrategy?: (strategyId: string) => void
   onCreatePending?: (pending: PendingStrategy) => void
-  /** Optional initial sub-page, defaults to "strategies" */
   initialSubPage?: SubPage
 }
 
@@ -27,14 +27,19 @@ interface StrategyCenterProps {
 
 const tabs: { key: SubPage; label: string; icon: React.ReactNode }[] = [
   {
-    key: "strategies",
-    label: "策略列表",
-    icon: <Briefcase className="h-4 w-4" />,
-  },
-  {
     key: "consultation",
     label: "资讯中心",
     icon: <BookOpen className="h-4 w-4" />,
+  },
+  {
+    key: "research",
+    label: "研报中心",
+    icon: <FileSearch className="h-4 w-4" />,
+  },
+  {
+    key: "strategies",
+    label: "策略列表",
+    icon: <Briefcase className="h-4 w-4" />,
   },
 ]
 
@@ -45,7 +50,7 @@ export function StrategyCenter({
   onStrategiesChange,
   onSelectStrategy,
   onCreatePending,
-  initialSubPage = "strategies",
+  initialSubPage = "consultation",
 }: StrategyCenterProps) {
   const [subPage, setSubPage] = useState<SubPage>(initialSubPage)
 
@@ -69,7 +74,6 @@ export function StrategyCenter({
             >
               {icon}
               {label}
-              {/* Active indicator bar */}
               {subPage === key && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-blue-600" />
               )}
@@ -80,6 +84,8 @@ export function StrategyCenter({
 
       {/* ── Page content ── */}
       <div className="flex-1 overflow-hidden">
+        {subPage === "consultation" && <ConsultationCenter />}
+        {subPage === "research" && <ResearchCenter />}
         {subPage === "strategies" && (
           <StrategiesGrid
             strategies={strategies}
@@ -88,7 +94,6 @@ export function StrategyCenter({
             onCreatePending={onCreatePending}
           />
         )}
-        {subPage === "consultation" && <ConsultationCenter />}
       </div>
     </div>
   )
