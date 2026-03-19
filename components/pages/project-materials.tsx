@@ -875,8 +875,8 @@ export function ProjectMaterials({
 
           {/* ── Step: config ── */}
           {genStep === "config" && (
-            <ScrollArea className="flex-1 min-h-0">
-              <div className="space-y-5 py-2 pr-1">
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="space-y-5 py-2 pr-2">
 
                 {/* Hypotheses */}
                 <div className="space-y-2">
@@ -1026,7 +1026,7 @@ export function ProjectMaterials({
                   />
                 </div>
               </div>
-            </ScrollArea>
+            </div>
           )}
 
           {/* ── Step: generating ── */}
