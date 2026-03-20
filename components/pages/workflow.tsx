@@ -38,7 +38,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-import { Trash2, Upload, Link2, Pencil, Target, FileCheck, AlertTriangle, Shield, Handshake, CheckCircle, ClipboardCheck } from "lucide-react"
+import { Trash2, Upload, Link2, Pencil, Target, FileCheck, AlertTriangle, Shield, Handshake, CheckCircle, ClipboardCheck, Eye } from "lucide-react"
 
 /* ─── Types ──────────────────────────────────── */
 export interface PhaseLog {
@@ -388,6 +388,7 @@ export interface AiResearchMaterial {
   category: string      // 材料分类
   format: string        // 格式 (PDF, XLSX, DOCX, etc.)
   name: string          // 材料名称
+  size: string          // 文件大小
   description: string   // AI调研内容摘要
   source: string        // 数据来源
   isUploaded: boolean   // 是否已上传
@@ -1690,6 +1691,7 @@ export function Workflow({
       material: {
         name: material.name,
         format: material.format,
+        size: material.size,
         category: material.category,
         description: material.description,
         collectReason: `AI调研生成，来源：${material.source}`,
@@ -1747,6 +1749,7 @@ export function Workflow({
                   category: "行业报告",
                   format: "PDF",
                   name: "2024年AI大模型行业市场规模报告",
+                  size: "4.8 MB",
                   description: "涵盖全球及中国AI大模型市场规模、CAGR预测、细分赛道分布及主要驱动因素分析",
                   source: "IDC / 艾瑞咨询",
                   isUploaded: false,
@@ -1756,6 +1759,7 @@ export function Workflow({
                   category: "行业报告",
                   format: "PDF",
                   name: "企业级AI应用市场趋势分析",
+                  size: "3.2 MB",
                   description: "聚焦企业级AI应用渗透率、典型采购路径、客户决策因素及未来增长预测",
                   source: "Gartner / 麦肯锡",
                   isUploaded: false,
@@ -1772,6 +1776,7 @@ export function Workflow({
                   category: "竞品分析",
                   format: "PDF",
                   name: "核心竞争对手产品对比分析",
+                  size: "5.1 MB",
                   description: "对标企业的产品功能矩阵、定价策略、客户覆盖及技术差异化分析",
                   source: "公开信息 / AI综合分析",
                   isUploaded: false,
@@ -1781,6 +1786,7 @@ export function Workflow({
                   category: "竞品分析",
                   format: "XLSX",
                   name: "赛道融资事件数据库",
+                  size: "1.6 MB",
                   description: "近3年赛道内融资事件汇总，含轮次、金额、估值倍数及领投机构信息",
                   source: "IT桔子 / 36氪",
                   isUploaded: false,
@@ -1797,6 +1803,7 @@ export function Workflow({
                   category: "工商信息",
                   format: "PDF",
                   name: "目标公司工商登记及股权结构摘要",
+                  size: "2.3 MB",
                   description: "企业注册信息、历史股权变更、对外投资关系及经营范围摘要",
                   source: "天眼查 / 企查查",
                   isUploaded: false,
@@ -1806,6 +1813,7 @@ export function Workflow({
                   category: "媒体报道",
                   format: "PDF",
                   name: "创始团队公开信息汇编",
+                  size: "3.7 MB",
                   description: "创始人及核心高管的公开演讲、媒体采访、学术背景及社会关系梳理",
                   source: "公开媒体 / AI综合整理",
                   isUploaded: false,
@@ -4373,16 +4381,25 @@ ${logs}
                                 key={material.id}
                                 className="rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-3"
                               >
-                                <div className="flex items-center justify-between gap-4 mb-2">
-                                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                                    <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-[10px] shrink-0">
-                                      {material.category}
-                                    </Badge>
-                                    <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] shrink-0">
-                                      {material.format}
-                                    </Badge>
-                                    <span className="text-sm font-medium text-[#374151] truncate">{material.name}</span>
-                                  </div>
+                                {/* Header: badges + size + name */}
+                                <div className="flex items-center gap-2 flex-wrap mb-2">
+                                  <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-[10px] shrink-0">
+                                    {material.category}
+                                  </Badge>
+                                  <Badge className="bg-gray-50 text-gray-600 border-gray-200 text-[10px] shrink-0">
+                                    {material.format}
+                                  </Badge>
+                                  <span className="text-[10px] text-[#9CA3AF] shrink-0">{material.size}</span>
+                                  <span className="text-sm font-medium text-[#374151] truncate">{material.name}</span>
+                                </div>
+                                {/* Source & description */}
+                                <div className="flex items-start gap-1.5">
+                                  <span className="text-xs text-[#9CA3AF] shrink-0">来源:</span>
+                                  <span className="text-xs text-[#6B7280]">{material.source}</span>
+                                </div>
+                                <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">{material.description}</p>
+                                {/* Action buttons */}
+                                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-[#E5E7EB]">
                                   {isUploaded ? (
                                     <span className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#6B7280] shrink-0">
                                       <Check className="h-3 w-3" />
@@ -4397,12 +4414,15 @@ ${logs}
                                       上传该材料
                                     </button>
                                   )}
+                                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] shrink-0">
+                                    <Eye className="h-3 w-3" />
+                                    查看该材料
+                                  </button>
+                                  <button className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] shrink-0">
+                                    <Pencil className="h-3 w-3" />
+                                    编辑该材料
+                                  </button>
                                 </div>
-                                <div className="flex items-start gap-1.5 mt-1">
-                                  <span className="text-xs text-[#9CA3AF] shrink-0">来源:</span>
-                                  <span className="text-xs text-[#6B7280]">{material.source}</span>
-                                </div>
-                                <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">{material.description}</p>
                               </div>
                             )
                           })}
