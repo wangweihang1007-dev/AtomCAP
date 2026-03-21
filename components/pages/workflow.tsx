@@ -1396,7 +1396,6 @@ export function Workflow({
 
     onCreatePendingProjectHypothesis?.(pendingHypothesis)
     handleCloseCreateDialog()
-    handleCloseFullPageView()
   }
 
   // Term creation handlers
@@ -1448,7 +1447,6 @@ export function Workflow({
     }
     onCreatePendingProjectTerm?.(pendingTerm)
     handleCloseTermCreateDialog()
-    handleCloseFullPageView()
   }
 
   // Material creation handlers
@@ -1555,7 +1553,6 @@ export function Workflow({
     }
     onCreatePendingProjectMaterial?.(pendingMaterial)
     setShowCoreTeamDialog(false)
-    handleCloseFullPageView()
   }
 
   function handleSubmitMaterial() {
@@ -1576,7 +1573,6 @@ export function Workflow({
     }
     onCreatePendingProjectMaterial?.(pendingMaterial)
     handleCloseMaterialCreateDialog()
-    handleCloseFullPageView()
   }
 
   function handleStartTermGeneration() {
