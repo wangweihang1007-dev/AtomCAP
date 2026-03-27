@@ -1,16 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf } from "lucide-react"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog"
+import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf, X, Check, MoreHorizontal, ChevronRight, ArrowLeft } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
@@ -22,12 +14,6 @@ const availableOwners = [
   { id: "zhaoqiang", name: "赵强", initials: "赵强" },
   { id: "chenzong", name: "陈总", initials: "陈总" },
 ]
-
-// Strategy type configurations
-const strategyTypeConfig = {
-  "主题策略": { color: "bg-blue-50 text-blue-700 border-blue-200", iconBg: "bg-blue-100 text-blue-600" },
-  "赛道策略": { color: "bg-violet-50 text-violet-700 border-violet-200", iconBg: "bg-violet-100 text-violet-600" },
-}
 
 // Available icons for selection
 const availableIcons = [
@@ -53,8 +39,10 @@ export interface Strategy {
   returnRate: string
   owner: { id: string; name: string; initials: string }
   createdAt: string
-  parentStrategyId?: string // 赛道策略挂靠的主题策略ID
-  parentStrategyName?: string // 赛道策略挂靠的主题策略名称
+  tags?: string[]
+  frameworkName?: string
+  parentStrategyId?: string
+  parentStrategyName?: string
 }
 
 export interface PendingStrategy {
@@ -156,6 +144,8 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+32%",
     owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
     createdAt: "2023-06-15",
+    tags: ["AI", "基础设施"],
+    frameworkName: "科技成长型框架",
   },
   {
     id: "2",
@@ -170,6 +160,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+18%",
     owner: { id: "lisi", name: "李四", initials: "李四" },
     createdAt: "2023-07-20",
+    tags: ["大模型", "应用"],
     parentStrategyId: "1",
     parentStrategyName: "AI基础设施",
   },
@@ -186,6 +177,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+25%",
     owner: { id: "wangfang", name: "王芳", initials: "王芳" },
     createdAt: "2023-02-20",
+    tags: ["企业", "数字化"],
   },
   {
     id: "3",
@@ -286,20 +278,407 @@ interface StrategiesGridProps {
   onCreatePending?: (pending: PendingStrategy) => void
 }
 
+/* ------------------------------------------------------------------ */
+/*  Mock data for create flow                                          */
+/* ------------------------------------------------------------------ */
+const AVAILABLE_FRAMEWORKS = [
+  {
+    name: "科技成长型框架",
+    dimensionCount: 5,
+    dimensions: ["产业阶段判断", "技术成熟度", "竞争格局", "商业模式", "团队评估"],
+  },
+  {
+    name: "价值投资评估框架",
+    dimensionCount: 4,
+    dimensions: ["财务健康度", "内在价值", "安全边际", "催化剂"],
+  },
+]
+
+const EXISTING_STRATEGIES_REF = [
+  { name: "AI 基础设施", framework: "科技成长型框架", hypothesisCount: 12, termCount: 8 },
+]
+
+const CREATE_STEPS = [
+  { num: 1, label: "基本信息" },
+  { num: 2, label: "数据来源" },
+  { num: 3, label: "生成与审核" },
+]
+
+/* ------------------------------------------------------------------ */
+/*  Step 1 — 基本信息                                                   */
+/* ------------------------------------------------------------------ */
+function CreateStrategyStep1({
+  name, setName, description, setDescription,
+  tags, setTags, tagInput, setTagInput,
+  refStrategyChecked, setRefStrategyChecked,
+  selectedFramework, setSelectedFramework,
+  onCancel, onNext,
+}: {
+  name: string; setName: (v: string) => void
+  description: string; setDescription: (v: string) => void
+  tags: string[]; setTags: (v: string[]) => void
+  tagInput: string; setTagInput: (v: string) => void
+  refStrategyChecked: boolean; setRefStrategyChecked: (v: boolean) => void
+  selectedFramework: string; setSelectedFramework: (v: string) => void
+  onCancel: () => void; onNext: () => void
+}) {
+  function addTag() {
+    const t = tagInput.trim()
+    if (t && !tags.includes(t)) {
+      setTags([...tags, t])
+    }
+    setTagInput("")
+  }
+
+  function removeTag(tag: string) {
+    setTags(tags.filter((t) => t !== tag))
+  }
+
+  return (
+    <>
+      {/* 策略名称 */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-[#374151] mb-2">策略名称</label>
+        <Input
+          placeholder="基础大模型"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="bg-white border-[#E5E7EB] text-base"
+        />
+      </div>
+
+      {/* 策略描述 */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-[#374151] mb-2">策略描述</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={4}
+          placeholder="聚焦基础大模型赛道，关注模型训练、推理优化和算力效率方向"
+          className="w-full rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827] leading-relaxed placeholder:text-[#9CA3AF] focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB] resize-y"
+        />
+      </div>
+
+      {/* 标签 */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-[#374151] mb-2">标签</label>
+        <div className="flex flex-wrap items-center gap-2">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-1 text-sm text-[#374151]"
+            >
+              {tag}
+              <button onClick={() => removeTag(tag)} className="text-[#9CA3AF] hover:text-[#374151]">
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+          <button
+            onClick={() => {
+              const t = tagInput.trim()
+              if (t) { addTag() } else { setTagInput(" ") }
+            }}
+            className="inline-flex items-center gap-1 rounded-full border border-dashed border-[#D1D5DB] px-3 py-1 text-sm text-[#6B7280] hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
+          >
+            <Plus className="h-3 w-3" />
+            添加
+          </button>
+        </div>
+        {tagInput !== "" && (
+          <div className="mt-2">
+            <Input
+              value={tagInput.trim()}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag() } }}
+              placeholder="输入标签后按回车"
+              className="w-48 h-8 text-sm bg-white border-[#E5E7EB]"
+              autoFocus
+              onBlur={() => { addTag(); setTagInput("") }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* 参考已有策略 */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-[#374151] mb-2">参考已有策略（可选）</label>
+        {EXISTING_STRATEGIES_REF.map((ref) => (
+          <label
+            key={ref.name}
+            className={cn(
+              "flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-all",
+              refStrategyChecked
+                ? "border-[#2563EB] bg-blue-50/30"
+                : "border-[#E5E7EB] bg-white hover:border-[#D1D5DB]"
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={refStrategyChecked}
+              onChange={(e) => setRefStrategyChecked(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-[#D1D5DB] text-[#2563EB] focus:ring-[#2563EB]"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-[#111827]">
+                  {ref.name}（{ref.framework}）
+                </span>
+                <span className="text-xs text-[#9CA3AF]">
+                  {ref.hypothesisCount} 个假设 · {ref.termCount} 个条款
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-[#6B7280]">
+                选中后，AI 生成时会参考此策略的三清单，避免重复分析已有的判断
+              </p>
+            </div>
+          </label>
+        ))}
+      </div>
+
+      {/* 所用分析框架 */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-[#374151] mb-2">所用分析框架</label>
+        <div className="space-y-3">
+          {AVAILABLE_FRAMEWORKS.map((fw) => (
+            <button
+              key={fw.name}
+              onClick={() => setSelectedFramework(fw.name)}
+              className={cn(
+                "w-full flex items-center justify-between rounded-xl border p-4 text-left transition-all",
+                selectedFramework === fw.name
+                  ? "border-[#2563EB] bg-blue-50/30 shadow-sm"
+                  : "border-[#E5E7EB] bg-white hover:border-[#D1D5DB]"
+              )}
+            >
+              <div>
+                <h4 className="text-sm font-semibold text-[#111827]">{fw.name}</h4>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {fw.dimensions.map((d) => (
+                    <span key={d} className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-2 py-0.5 text-[11px] text-[#6B7280]">
+                      {d}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <span className="shrink-0 text-xs text-[#2563EB] font-medium">
+                {fw.dimensionCount} 个分析维度
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E5E7EB]">
+        <button
+          onClick={onCancel}
+          className="rounded-lg border border-[#D1D5DB] bg-white px-5 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]"
+        >
+          取消
+        </button>
+        <button
+          onClick={onNext}
+          disabled={!name.trim() || !selectedFramework}
+          className="rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          下一步: 配置数据来源
+        </button>
+      </div>
+    </>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Create Strategy Page (full-page, multi-step)                       */
+/* ------------------------------------------------------------------ */
+function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void; onSave: (s: Omit<Strategy, "id">) => void; strategies: Strategy[] }) {
+  const [step, setStep] = useState(1)
+
+  // Step 1 state
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+  const [tags, setTags] = useState<string[]>(["AI", "基础设施", "大模型"])
+  const [tagInput, setTagInput] = useState("")
+  const [refStrategyChecked, setRefStrategyChecked] = useState(true)
+  const [selectedFramework, setSelectedFramework] = useState("科技成长型框架")
+
+  function handleSave() {
+    onSave({
+      name: name.trim(),
+      type: "主题策略",
+      typeColor: "bg-blue-50 text-blue-700 border-blue-200",
+      icon: Cpu,
+      iconBg: "bg-blue-100 text-blue-600",
+      description: description.trim() || "暂无策略简介",
+      projectCount: 0,
+      totalInvest: "0",
+      returnRate: "+0%",
+      owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
+      createdAt: new Date().toISOString().split("T")[0],
+      tags,
+      frameworkName: selectedFramework,
+    })
+  }
+
+  return (
+    <div className="flex h-full flex-col overflow-hidden bg-[#F3F4F6]">
+      {/* Steps indicator */}
+      <div className="shrink-0 px-8 pt-6 pb-0">
+        <div className="flex items-center justify-center gap-0 mb-8">
+          {CREATE_STEPS.map((s, idx) => {
+            const isCompleted = s.num < step
+            const isActive = s.num === step
+            return (
+              <div key={s.num} className="flex items-center">
+                {idx > 0 && <div className={`mx-2 h-px w-10 ${s.num <= step ? "bg-[#2563EB]" : "bg-[#D1D5DB]"}`} />}
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
+                      isCompleted
+                        ? "bg-[#2563EB] text-white"
+                        : isActive
+                          ? "bg-[#2563EB] text-white"
+                          : "border border-[#D1D5DB] bg-white text-[#9CA3AF]"
+                    }`}
+                  >
+                    {isCompleted ? <Check className="h-3.5 w-3.5" /> : s.num}
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${
+                      isActive ? "text-[#2563EB]" : isCompleted ? "text-[#111827]" : "text-[#9CA3AF]"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 overflow-auto px-8 pb-8">
+        <div className="mx-auto max-w-3xl">
+          {step === 1 && (
+            <CreateStrategyStep1
+              name={name} setName={setName}
+              description={description} setDescription={setDescription}
+              tags={tags} setTags={setTags}
+              tagInput={tagInput} setTagInput={setTagInput}
+              refStrategyChecked={refStrategyChecked} setRefStrategyChecked={setRefStrategyChecked}
+              selectedFramework={selectedFramework} setSelectedFramework={setSelectedFramework}
+              onCancel={onCancel} onNext={() => setStep(2)}
+            />
+          )}
+
+          {step === 2 && (
+            <div>
+              <h1 className="text-xl font-bold text-[#111827] mb-2">配置数据来源</h1>
+              <p className="text-sm text-[#6B7280] mb-8">
+                选择 AI 生成策略时需要参考的数据来源
+              </p>
+
+              <div className="space-y-4 mb-8">
+                {["项目材料库", "研报中心", "行业数据库", "公开市场数据"].map((source) => (
+                  <label
+                    key={source}
+                    className="flex items-center gap-3 rounded-xl border border-[#E5E7EB] bg-white p-4 cursor-pointer hover:border-[#D1D5DB] transition-colors"
+                  >
+                    <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-[#D1D5DB] text-[#2563EB] focus:ring-[#2563EB]" />
+                    <span className="text-sm font-medium text-[#374151]">{source}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
+                <button
+                  onClick={() => setStep(1)}
+                  className="rounded-lg border border-[#D1D5DB] bg-white px-5 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]"
+                >
+                  返回上一步
+                </button>
+                <button
+                  onClick={() => setStep(3)}
+                  className="rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827]"
+                >
+                  下一步: 生成与审核
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div>
+              <h1 className="text-xl font-bold text-[#111827] mb-2">生成与审核</h1>
+              <p className="text-sm text-[#6B7280] mb-8">
+                确认策略信息后，AI 将基于分析框架和数据来源自动生成策略内容
+              </p>
+
+              {/* Summary card */}
+              <div className="rounded-xl border border-[#E5E7EB] bg-white p-6 mb-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-[#9CA3AF] mb-1">策略名称</p>
+                    <p className="text-sm font-semibold text-[#111827]">{name || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#9CA3AF] mb-1">分析框架</p>
+                    <p className="text-sm font-semibold text-[#111827]">{selectedFramework || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#9CA3AF] mb-1">标签</p>
+                    <div className="flex flex-wrap gap-1">
+                      {tags.map((t) => (
+                        <span key={t} className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-2 py-0.5 text-[11px] text-[#6B7280]">{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#9CA3AF] mb-1">参考策略</p>
+                    <p className="text-sm font-semibold text-[#111827]">{refStrategyChecked ? "AI 基础设施" : "无"}</p>
+                  </div>
+                </div>
+                {description && (
+                  <div>
+                    <p className="text-xs text-[#9CA3AF] mb-1">策略描述</p>
+                    <p className="text-sm text-[#374151] leading-relaxed">{description}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
+                <button
+                  onClick={() => setStep(2)}
+                  className="rounded-lg border border-[#D1D5DB] bg-white px-5 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]"
+                >
+                  返回上一步
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={!name.trim()}
+                  className="rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  确认创建策略
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main Component                                                     */
+/* ------------------------------------------------------------------ */
+type StrategiesView = "list" | "create"
+
 export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrategy, onCreatePending }: StrategiesGridProps) {
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [view, setView] = useState<StrategiesView>("list")
   const [searchQuery, setSearchQuery] = useState("")
-
-  // Form state
-  const [newName, setNewName] = useState("")
-  const [newDescription, setNewDescription] = useState("")
-  const [newType, setNewType] = useState<"主题策略" | "赛道策略">("主题策略")
-  const [selectedIconIndex, setSelectedIconIndex] = useState(0)
-  const [selectedOwnerId, setSelectedOwnerId] = useState("zhangwei")
-  const [selectedParentStrategyId, setSelectedParentStrategyId] = useState<string>("")
-
-  // Get theme strategies for parent selection
-  const themeStrategies = strategies.filter((s) => s.type === "主题策略")
 
   const filteredStrategies = strategies.filter(
     (s) =>
@@ -307,58 +686,17 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
       s.description.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  function handleCreate() {
-    if (!newName.trim()) return
-    // 赛道策略必须选择挂靠的主题策略
-    if (newType === "赛道策略" && !selectedParentStrategyId) return
-
-    const typeConfig = strategyTypeConfig[newType]
-    const iconConfig = availableIcons[selectedIconIndex]
-    const owner = availableOwners.find((o) => o.id === selectedOwnerId) || availableOwners[0]
-    const parentStrategy = themeStrategies.find((s) => s.id === selectedParentStrategyId)
-
-    const newStrategy: Omit<Strategy, "id"> = {
-      name: newName.trim(),
-      type: newType,
-      typeColor: typeConfig.color,
-      icon: iconConfig.icon,
-      iconBg: iconConfig.bg,
-      description: newDescription.trim() || "暂无策略简介",
-      projectCount: 0,
-      totalInvest: "0",
-      returnRate: "+0%",
-      owner,
-      createdAt: new Date().toISOString().split("T")[0],
-      ...(newType === "赛道策略" && parentStrategy
-        ? { parentStrategyId: parentStrategy.id, parentStrategyName: parentStrategy.name }
-        : {}),
+  function handleSaveStrategy(data: Omit<Strategy, "id">) {
+    const newStrategy: Strategy = {
+      ...data,
+      id: `s-${Date.now()}`,
     }
-
-    const pendingRequest: PendingStrategy = {
-      id: `pending-${Date.now()}`,
-      strategy: newStrategy,
-      changeId: `CR-${Date.now().toString().slice(-6)}`,
-      changeName: `新建策略: ${newName.trim()}`,
-      initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
-      initiatedAt: new Date().toISOString().split("T")[0],
-      reviewers: [
-        { id: "zhangwei", name: "张伟", initials: "张伟" },
-        { id: "lisi", name: "李四", initials: "李四" },
-      ],
-    }
-
-    onCreatePending?.(pendingRequest)
-    setIsCreateOpen(false)
-    resetForm()
+    onStrategiesChange([newStrategy, ...strategies])
+    setView("list")
   }
 
-  function resetForm() {
-    setNewName("")
-    setNewDescription("")
-    setNewType("主题策略")
-    setSelectedIconIndex(0)
-    setSelectedOwnerId("zhangwei")
-    setSelectedParentStrategyId("")
+  if (view === "create") {
+    return <CreateStrategy onCancel={() => setView("list")} onSave={handleSaveStrategy} strategies={strategies} />
   }
 
   return (
@@ -387,7 +725,7 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
               />
             </div>
             <button
-              onClick={() => setIsCreateOpen(true)}
+              onClick={() => setView("create")}
               className="flex items-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8]"
             >
               <Plus className="h-4 w-4" />
@@ -406,28 +744,35 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
                 onClick={() => onSelectStrategy?.(strategy.id)}
                 className="group flex flex-col rounded-xl border border-[#E5E7EB] bg-white p-6 text-left transition-all hover:border-[#2563EB]/30 hover:shadow-lg hover:shadow-[#2563EB]/5"
               >
-                {/* Icon & Type */}
+                {/* Icon */}
                 <div className="flex items-start justify-between mb-4">
                   <div
                     className={`flex h-11 w-11 items-center justify-center rounded-xl ${strategy.iconBg} transition-transform group-hover:scale-105`}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
-                  <span
-                    className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${strategy.typeColor}`}
-                  >
-                    {strategy.type}
-                  </span>
+                  {strategy.tags && strategy.tags.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      {strategy.tags.slice(0, 2).map((tag) => (
+                        <span key={tag} className="inline-flex rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-2 py-0.5 text-[10px] font-medium text-[#6B7280]">
+                          {tag}
+                        </span>
+                      ))}
+                      {strategy.tags.length > 2 && (
+                        <span className="text-[10px] text-[#9CA3AF]">+{strategy.tags.length - 2}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Info */}
                 <h3 className="text-base font-semibold text-[#111827] mb-1">
                   {strategy.name}
                 </h3>
-                {strategy.type === "赛道策略" && strategy.parentStrategyName && (
+                {strategy.frameworkName && (
                   <div className="mb-2">
                     <span className="inline-flex items-center rounded-md bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-medium text-blue-700">
-                      挂靠主题：{strategy.parentStrategyName}
+                      {strategy.frameworkName}
                     </span>
                   </div>
                 )}
@@ -471,192 +816,6 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
           })}
         </div>
       </div>
-
-      {/* Create Strategy Dialog */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[#111827]">新建策略</DialogTitle>
-            <DialogDescription className="text-sm text-[#6B7280]">
-              创建一个新的投资策略，用于管理和跟踪特定领域的投资项目
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-5 py-4">
-            {/* Logo Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#374151]">策略Logo</Label>
-              <div className="flex flex-wrap gap-2">
-                {availableIcons.map((item, index) => {
-                  const IconComponent = item.icon
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setSelectedIconIndex(index)}
-                      className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-xl transition-all",
-                        item.bg,
-                        selectedIconIndex === index
-                          ? "ring-2 ring-[#2563EB] ring-offset-2"
-                          : "hover:opacity-80"
-                      )}
-                    >
-                      <IconComponent className="h-5 w-5" />
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Name */}
-            <div className="space-y-2">
-              <Label htmlFor="strategy-name" className="text-sm font-medium text-[#374151]">
-                策略名称
-              </Label>
-              <Input
-                id="strategy-name"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="输入策略名称"
-                className="h-10"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="strategy-desc" className="text-sm font-medium text-[#374151]">
-                策略简介
-              </Label>
-              <textarea
-                id="strategy-desc"
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                placeholder="输入策略简介..."
-                rows={3}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
-              />
-            </div>
-
-            {/* Owner Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#374151]">负责人</Label>
-              <div className="flex flex-wrap gap-2">
-                {availableOwners.map((owner) => (
-                  <button
-                    key={owner.id}
-                    type="button"
-                    onClick={() => setSelectedOwnerId(owner.id)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all",
-                      selectedOwnerId === owner.id
-                        ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB]"
-                        : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB]"
-                    )}
-                  >
-                    <Avatar className="h-5 w-5">
-                      <AvatarFallback className="bg-[#E5E7EB] text-[8px] text-[#374151]">
-                        {owner.initials.slice(0, 1)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {owner.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Type Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#374151]">策略类型</Label>
-              <div className="flex gap-2">
-                {(Object.keys(strategyTypeConfig) as Array<"主题策略" | "赛道策略">).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => {
-                      setNewType(type)
-                      if (type === "主题策略") {
-                        setSelectedParentStrategyId("")
-                      }
-                    }}
-                    className={cn(
-                      "flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
-                      newType === type
-                        ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB]"
-                        : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB]"
-                    )}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Parent Strategy Selection (only for 赛道策略) */}
-            {newType === "赛道策略" && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#374151]">
-                  挂靠主题策略 <span className="text-red-500">*</span>
-                </Label>
-                {themeStrategies.length === 0 ? (
-                  <p className="text-sm text-[#9CA3AF] p-3 bg-[#F9FAFB] rounded-lg">
-                    暂无可挂靠的主题策略，请先创建主题策略
-                  </p>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {themeStrategies.map((strategy) => {
-                      const Icon = strategy.icon
-                      return (
-                        <button
-                          key={strategy.id}
-                          type="button"
-                          onClick={() => setSelectedParentStrategyId(strategy.id)}
-                          className={cn(
-                            "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all",
-                            selectedParentStrategyId === strategy.id
-                              ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB]"
-                              : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB]"
-                          )}
-                        >
-                          <div className={cn("flex h-6 w-6 items-center justify-center rounded-md", strategy.iconBg)}>
-                            <Icon className="h-3.5 w-3.5" />
-                          </div>
-                          {strategy.name}
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-                <p className="text-xs text-[#9CA3AF]">
-                  赛道策略将继承所选主题策略的假设清单和条款清单
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                setIsCreateOpen(false)
-                resetForm()
-              }}
-              className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB]"
-            >
-              取消
-            </button>
-            <button
-              type="button"
-              onClick={handleCreate}
-              disabled={!newName.trim() || (newType === "赛道策略" && !selectedParentStrategyId)}
-              className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              创建
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

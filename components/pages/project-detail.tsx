@@ -203,6 +203,7 @@ export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCr
             isInDuration={isHypothesisLocked || !!isExited}
             isExited={isExited}
             isMidInvestment={isMidInvestment}
+            isPostInvestment={isPostInvestment}
             project={project}
             projectMaterials={projectMaterials}
             inheritedHypotheses={projectHypotheses}
@@ -226,7 +227,7 @@ export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCr
             onCreateImplementationStatus={onCreateImplementationStatus}
           />
         ) : activeSubPage === "overview" ? (
-          <ProjectOverview project={project} isNewProject={isNewProject} />
+          <ProjectOverview project={project} isNewProject={isNewProject} projectHypotheses={projectHypotheses} projectTerms={projectTerms} projectMaterials={projectMaterials} />
         ) : activeSubPage === "materials" ? (
           <ProjectMaterials
             isNewProject={isNewProject}

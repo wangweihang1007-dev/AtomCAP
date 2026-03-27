@@ -39,10 +39,17 @@ const investmentRounds = ["Pre-A", "A轮", "B轮", "C轮", "D轮", "战略投资
 
 // Project status options
 const statusOptions = [
+  { value: "未立项", color: "bg-gray-50 text-gray-600 border-gray-200" },
   { value: "投前期", color: "bg-blue-50 text-blue-700 border-blue-200" },
   { value: "投中期", color: "bg-amber-50 text-amber-700 border-amber-200" },
   { value: "投后期", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  { value: "已退出", color: "bg-red-50 text-red-700 border-red-200" },
 ]
+
+/** Helper to look up status color by value */
+export function getStatusColor(status: string): string {
+  return statusOptions.find((o) => o.value === status)?.color ?? statusOptions[0].color
+}
 
 export interface Project {
   id: string

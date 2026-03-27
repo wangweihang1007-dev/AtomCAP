@@ -1769,11 +1769,11 @@ export function Workflow({
         setTermThinkingSteps((prev) => prev.map((step) => ({ ...step, status: "completed" })))
 
         setTimeout(() => {
-          const suggestions: GeneratedTermSuggestion[] = [
+          const suggestionsData: GeneratedTermSuggestion[] = [
             {
               id: "gts1",
-              title: "加强董事会席位条款",
-              content: "建议明确投资方董事会席位安排，包括委派权、参会权、信息知情权等核心权利条款。",
+              title: "加强董事会席位与治理条款",
+              content: "建议明确投资方董事会席位安排，包括委派权、参会权、信息知情权等核心权利条款，并完善董事会议事规则。",
               linkedHypotheses: [
                 { id: "h1", name: "创始人具有扎实的人工智能学术背景" },
               ],
@@ -1793,12 +1793,24 @@ export function Workflow({
                   ourBottomLine: { content: "至少获得一个董事席位，确保重大事项的知情权和参与权。" },
                   compromiseSpace: { content: "可接受观察员席位作为过渡，但需明确升级为正式董事的条件。" },
                 },
+                {
+                  id: "st1-2",
+                  direction: "控制权条款",
+                  category: "董事会条款",
+                  name: "董事会每季度至少召开一次正式会议",
+                  isExisting: false,
+                  ourDemand: { content: "董事会每季度至少召开一次正式会议，投资方董事有权以视频方式参会。", linkedMaterialIds: [], linkedHypothesisIds: [] },
+                  ourBasis: { content: "确保投资方定期了解公司经营状况，参与重大决策的审议和表决。", linkedMaterialIds: ["m7"], linkedHypothesisIds: [] },
+                  bilateralConflict: { content: "公司可能认为季度会议频率过高，增加管理层的时间成本。" },
+                  ourBottomLine: { content: "每季度至少一次正式董事会是底线要求。" },
+                  compromiseSpace: { content: "非季度可通过书面决议方式进行紧急事项表决。" },
+                },
               ],
             },
             {
               id: "gts2",
-              title: "完善反稀释保护条款",
-              content: "建议采用加权平均反稀释条款，明确触发条件、调整机制和豁免情形。",
+              title: "完善反稀释与估值保护条款",
+              content: "建议采用加权平均反稀释条款，明确触发条件、调整机制和豁免情形，并增加估值保护机制。",
               linkedHypotheses: [
                 { id: "h4", name: "单位经济模型健康，具备规模化盈利基础" },
               ],
@@ -1809,7 +1821,7 @@ export function Workflow({
               terms: [
                 {
                   id: "st2-1",
-                  direction: "经济��条款",
+                  direction: "经济性条款",
                   category: "反稀释条款",
                   name: "采用加权平均反稀释保护机制",
                   isExisting: false,
@@ -1819,12 +1831,36 @@ export function Workflow({
                   ourBottomLine: { content: "必须有反稀释保护机制，广义加权平均是最低要求。" },
                   compromiseSpace: { content: "可接受设定合理的豁免情形，如员工期权池扩大、战略并购等。" },
                 },
+                {
+                  id: "st2-2",
+                  direction: "经济性条款",
+                  category: "反稀释条款",
+                  name: "采用完全棘轮反稀释条款保护投资方权益",
+                  isExisting: true,
+                  ourDemand: { content: "建议将完全棘轮调整为加权平均，降低对创始团队的稀释压力，更有利于长期合作。", linkedMaterialIds: ["m5"], linkedHypothesisIds: ["h4"] },
+                  ourBasis: { content: "完全棘轮条款对创始团队压力过大，可能影响其积极性；加权平均更符合市场惯例。", linkedMaterialIds: ["m8"], linkedHypothesisIds: [] },
+                  bilateralConflict: { content: "投资方希望保留最大保护力度，创始团队则希望减少股权稀释风险。" },
+                  ourBottomLine: { content: "保留反稀释保护机制不变，但可协商调整具体计算方式。" },
+                  compromiseSpace: { content: "可采用窄基加权平均作为折中方案。" },
+                },
+                {
+                  id: "st2-3",
+                  direction: "经济性条款",
+                  category: "估值保护",
+                  name: "设定对赌条款，未达业绩目标时触发估值调整",
+                  isExisting: false,
+                  ourDemand: { content: "若公司未能在约定期限内达到约定的营收或利润目标，投资方有权要求估值下调。", linkedMaterialIds: ["m5"], linkedHypothesisIds: ["h4"] },
+                  ourBasis: { content: "基于财务预测模型的增长假设，设定合理的业绩对赌目标以控制投资风险。", linkedMaterialIds: ["m5", "m8"], linkedHypothesisIds: ["h4"] },
+                  bilateralConflict: { content: "创始团队认为对赌条款施加了不合理的短期压力，可能影响长期战略布局。" },
+                  ourBottomLine: { content: "至少需要一项与核心业绩指标挂钩的保护机制。" },
+                  compromiseSpace: { content: "可适当延长对赌期限或降低业绩目标门槛，给予公司更多成长空间。" },
+                },
               ],
             },
             {
               id: "gts3",
-              title: "建立信息权条款",
-              content: "建议明确定期财务报告、重大事项通知、现场检查权等信息权条款。",
+              title: "建立信息权与审计条款",
+              content: "建议明确定期财务报告、重大事项通知、现场检查权等信息权条款，确保投资人对被投企业经营状况的知情权。",
               linkedHypotheses: [
                 { id: "h3", name: "市场规模足够支撑高速增长" },
               ],
@@ -1844,11 +1880,148 @@ export function Workflow({
                   ourBottomLine: { content: "至少季度财务报告和年度审计报告是必须的。" },
                   compromiseSpace: { content: "月报可简化为关键KPI指标，减轻公司负担。" },
                 },
+                {
+                  id: "st3-2",
+                  direction: "信息权条款",
+                  category: "技术信息权",
+                  name: "投资方有权对重大技术决策进行知情和建议",
+                  isExisting: true,
+                  ourDemand: { content: "建议扩大信息权范围，增加技术路线图和研发进度的定期报告义务。", linkedMaterialIds: ["m3"], linkedHypothesisIds: ["h3"] },
+                  ourBasis: { content: "AI行业技术迭代迅速，投资方需及时了解技术方向变化以评估投资风险。", linkedMaterialIds: ["m3"], linkedHypothesisIds: [] },
+                  bilateralConflict: { content: "技术团队担心过度披露影响核心技术的保密性。" },
+                  ourBottomLine: { content: "至少获得技术路线图变更的事前知情权。" },
+                  compromiseSpace: { content: "可签署保密协议限制信息使用范围。" },
+                },
+              ],
+            },
+            {
+              id: "gts4",
+              title: "优化退出与回购机制",
+              content: "建议完善投资人退出机制，包括回购权、领售权和优先清算权等条款，保障投资人的退出通道。",
+              linkedHypotheses: [
+                { id: "h5", name: "产品用户留存率和增长趋势积极" },
+              ],
+              linkedMaterials: [
+                { id: "m5", name: "财务预测模型" },
+              ],
+              terms: [
+                {
+                  id: "st4-1",
+                  direction: "退出条款",
+                  category: "回购条款",
+                  name: "若公司未能在5年内实现IPO，投资方有权要求回购",
+                  isExisting: true,
+                  ourDemand: { content: "建议将回购触发期限从5年缩短为4年，并明确回购价格计算方式。", linkedMaterialIds: ["m5"], linkedHypothesisIds: ["h5"] },
+                  ourBasis: { content: "根据财务预测模型，公司应在3-4年内具备IPO条件，5年期限过长不利于资金效率。", linkedMaterialIds: ["m5"], linkedHypothesisIds: ["h5"] },
+                  bilateralConflict: { content: "创始团队希望延长回购期限以降低短期压力。" },
+                  ourBottomLine: { content: "回购条款必须保留，触发条件可协商但不超过5年。" },
+                  compromiseSpace: { content: "可设定阶梯式回购价格，前3年按投资额加年化收益计算，后续按公允价值计算。" },
+                },
+                {
+                  id: "st4-2",
+                  direction: "退出条款",
+                  category: "领售权",
+                  name: "投资方享有共同出售权和领售权",
+                  isExisting: false,
+                  ourDemand: { content: "若创始股东出售超过10%股份，投资方有权按同比例同条件共同出售。", linkedMaterialIds: [], linkedHypothesisIds: [] },
+                  ourBasis: { content: "防止创始股东单独变现退出，保护投资人权益不受损害。", linkedMaterialIds: ["m5"], linkedHypothesisIds: [] },
+                  bilateralConflict: { content: "创始人希望保留灵活的股份处置权，不受投资人约束。" },
+                  ourBottomLine: { content: "共同出售权是底线要求，领售权可在条件上适当让步。" },
+                  compromiseSpace: { content: "可将领售权触发门槛设定为持股超过一定比例的投资人方可行使。" },
+                },
+              ],
+            },
+            {
+              id: "gts5",
+              title: "强化竞业限制与核心人员锁定",
+              content: "建议对创始团队和核心技术人员设定竞业限制和服务期条款，降低关键人才流失风险。",
+              linkedHypotheses: [
+                { id: "h2", name: "核心技术团队完备，关键岗位人才储备充足" },
+              ],
+              linkedMaterials: [
+                { id: "m2", name: "核心团队履历及期权安排" },
+              ],
+              terms: [
+                {
+                  id: "st5-1",
+                  direction: "控制权条款",
+                  category: "核心人员锁定",
+                  name: "创始人及核心技术人员在投资后3年内不得离职",
+                  isExisting: false,
+                  ourDemand: { content: "创始人和CTO等核心人员需签署3年服务期承诺，违反则触发股权回购。", linkedMaterialIds: ["m2"], linkedHypothesisIds: ["h2"] },
+                  ourBasis: { content: "AI公司核心价值在于技术团队，人才流失将严重影响公司发展和投资回报。", linkedMaterialIds: ["m2"], linkedHypothesisIds: ["h2"] },
+                  bilateralConflict: { content: "核心人员担心锁定期过长限制个人发展自由。" },
+                  ourBottomLine: { content: "至少2年的锁定期是必须的，需覆盖创始人和CTO。" },
+                  compromiseSpace: { content: "可设置分阶段解锁机制，前2年全额锁定，第3年可转让不超过20%的已兑现股份。" },
+                },
+                {
+                  id: "st5-2",
+                  direction: "控制权条款",
+                  category: "竞业限制",
+                  name: "核心人员离职后12个月内不得从事竞争业务",
+                  isExisting: false,
+                  ourDemand: { content: "核心人员离职后12个月内不得在竞争公司任职或自行开展竞争业务。", linkedMaterialIds: ["m2"], linkedHypothesisIds: ["h2"] },
+                  ourBasis: { content: "防止核心技术和商业机密外泄，保护公司竞争优势和投资人利益。", linkedMaterialIds: ["m2"], linkedHypothesisIds: [] },
+                  bilateralConflict: { content: "员工认为竞业限制影响再就业权利，要求公司支付竞业补偿金。" },
+                  ourBottomLine: { content: "至少覆盖创始人和CTO的竞业限制是必须的。" },
+                  compromiseSpace: { content: "可按月支付合理的竞业补偿金，金额不低于离职前12个月平均薪酬的50%。" },
+                },
+                {
+                  id: "st5-3",
+                  direction: "控制权条款",
+                  category: "核心人员锁定",
+                  name: "核心团队锁定",
+                  isExisting: true,
+                  ourDemand: { content: "建议细化核心团队的定义范围，扩展至VP级别以上管理人员。", linkedMaterialIds: ["m2"], linkedHypothesisIds: ["h2"] },
+                  ourBasis: { content: "VP级别人员掌握大量商业信息和客户资源，纳入锁定范围有利于稳定公司运营。", linkedMaterialIds: ["m2"], linkedHypothesisIds: [] },
+                  bilateralConflict: { content: "公司认为扩大锁定范围会增加管理成本和人力资源压力。" },
+                  ourBottomLine: { content: "至少覆盖CTO、CPO和首席科学家。" },
+                  compromiseSpace: { content: "可为VP级别设定较短的锁定期和较低的违约赔偿标准。" },
+                },
+              ],
+            },
+            {
+              id: "gts6",
+              title: "增设知识产权保护条款",
+              content: "建议明确核心技术知识产权归属、技术转让限制和专利维护义务等条款，保护公司核心资产。",
+              linkedHypotheses: [
+                { id: "h1", name: "创始人具有扎实的人工智能学术背景" },
+                { id: "h6", name: "技术领先，在特定领域构建较强护城河" },
+              ],
+              linkedMaterials: [
+                { id: "m1", name: "闫俊杰_CV" },
+                { id: "m7", name: "尽职调查报告" },
+              ],
+              terms: [
+                {
+                  id: "st6-1",
+                  direction: "投资保护条款",
+                  category: "知识产权",
+                  name: "核心技术IP不得未经投资方同意转让或授权第三方",
+                  isExisting: false,
+                  ourDemand: { content: "公司核心技术IP的转让、独占授权或重大变更须经董事会批准，投资方董事享有一票否决权。", linkedMaterialIds: ["m7"], linkedHypothesisIds: ["h1", "h6"] },
+                  ourBasis: { content: "核心IP是公司估值的核心支撑，未经控制的IP转让将严重损害投资价值。", linkedMaterialIds: ["m7", "m1"], linkedHypothesisIds: ["h6"] },
+                  bilateralConflict: { content: "公司希望保留技术授权的灵活性，以支持商业合作和生态建设。" },
+                  ourBottomLine: { content: "核心算法和模型架构的转让必须获得投资方同意。" },
+                  compromiseSpace: { content: "非核心技术的非独占授权可豁免审批，但需事后通知。" },
+                },
+                {
+                  id: "st6-2",
+                  direction: "投资保护条款",
+                  category: "知识产权",
+                  name: "对核心技术IP转让和授权享有一票否决权",
+                  isExisting: true,
+                  ourDemand: { content: "建议进一步明确'核心技术'的定义范围，将大模型训练方法、推理优化算法等纳入保护清单。", linkedMaterialIds: ["m7"], linkedHypothesisIds: ["h6"] },
+                  ourBasis: { content: "当前条款对核心技术定义模糊，存在规避风险；需对照技术评估报告明确保护范围。", linkedMaterialIds: ["m7", "m1"], linkedHypothesisIds: ["h1"] },
+                  bilateralConflict: { content: "技术团队认为过于严格的定义会限制正常的技术交流和开源贡献。" },
+                  ourBottomLine: { content: "至少覆盖自研大模型架构、训练数据集和推理引擎。" },
+                  compromiseSpace: { content: "可允许在学术论文中分享部分非核心技术成果，但需事先审批。" },
+                },
               ],
             },
           ]
-          setGeneratedTermSuggestions(suggestions)
-          onSaveTermSuggestions?.(suggestions)
+          setGeneratedTermSuggestions(suggestionsData)
+          onSaveTermSuggestions?.(suggestionsData)
           setIsTermGenerating(false)
           setTermGenerationComplete(true)
         }, 500)
