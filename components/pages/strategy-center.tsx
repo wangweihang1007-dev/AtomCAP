@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Briefcase, BookOpen, FileSearch } from "lucide-react"
+import { Briefcase, BookOpen, FileSearch, LayoutGrid } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   StrategiesGrid,
@@ -10,10 +10,11 @@ import {
 } from "@/components/pages/strategies-grid"
 import { ConsultationCenter } from "@/components/pages/consultation-center"
 import { ResearchCenter } from "@/components/pages/research-center"
+import { AnalysisFrameworks, type AnalysisFramework } from "@/components/pages/analysis-frameworks"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type SubPage = "consultation" | "research" | "strategies"
+type SubPage = "consultation" | "research" | "frameworks" | "strategies"
 
 interface StrategyCenterProps {
   strategies: Strategy[]
@@ -37,6 +38,11 @@ const tabs: { key: SubPage; label: string; icon: React.ReactNode }[] = [
     icon: <FileSearch className="h-4 w-4" />,
   },
   {
+    key: "frameworks",
+    label: "分析框架",
+    icon: <LayoutGrid className="h-4 w-4" />,
+  },
+  {
     key: "strategies",
     label: "策略列表",
     icon: <Briefcase className="h-4 w-4" />,
@@ -53,6 +59,7 @@ export function StrategyCenter({
   initialSubPage = "consultation",
 }: StrategyCenterProps) {
   const [subPage, setSubPage] = useState<SubPage>(initialSubPage)
+  const [createdFrameworks, setCreatedFrameworks] = useState<AnalysisFramework[]>([])
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -86,6 +93,12 @@ export function StrategyCenter({
       <div className="flex-1 overflow-hidden">
         {subPage === "consultation" && <ConsultationCenter />}
         {subPage === "research" && <ResearchCenter />}
+        {subPage === "frameworks" && (
+          <AnalysisFrameworks
+            createdFrameworks={createdFrameworks}
+            onCreatedFrameworksChange={setCreatedFrameworks}
+          />
+        )}
         {subPage === "strategies" && (
           <StrategiesGrid
             strategies={strategies}

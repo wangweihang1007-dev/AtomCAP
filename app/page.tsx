@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { AppTopbar, type TopNavKey } from "@/components/app-topbar"
 import { Dashboard } from "@/components/pages/dashboard"
-import { ProjectsGrid, type Project, type PendingProject, initialProjects } from "@/components/pages/projects-grid"
+import { ProjectsGrid, type Project, type PendingProject, initialProjects, getStatusColor } from "@/components/pages/projects-grid"
 import { type Strategy, type PendingStrategy, type StrategyHypothesis, type PendingHypothesis, type StrategyTerm, type PendingTerm, type StrategyMaterial, type PendingMaterial, initialStrategies } from "@/components/pages/strategies-grid"
 import { StrategyCenter } from "@/components/pages/strategy-center"
 import { ProjectDetail } from "@/components/pages/project-detail"
@@ -12,7 +12,7 @@ import { ChangeRequests } from "@/components/pages/change-requests"
 import { Login } from "@/components/pages/login"
 import type { Phase, PendingPhase, LiXiangRecord, TouJueRecord, HuaKuanRecord, TuiChuRecord, PendingProjectHypothesis, ProjectHypothesisFormData, GeneratedSuggestion, GeneratedTermSuggestion, PendingProjectTerm, PendingProjectMaterial, GeneratedMaterialSuggestion, GeneratedAiResearchGroup, PendingCommitteeDecision, CommitteeDecisionFormData, PendingNegotiationDecision, NegotiationDecisionFormData, PendingVerification, VerificationFormData, PendingImplementationStatus, ImplementationStatusFormData } from "@/components/pages/workflow"
 import { type HypothesisTableItem, type HypothesisDetail, type ValuePoint, type RiskPoint, getTemplateHypothesesForStrategy, midInvestmentHypotheses } from "@/components/pages/hypothesis-checklist"
-import { type TermTableItem, type TermDetail, getTemplateTermsForStrategy, midInvestmentTerms } from "@/components/pages/term-sheet"
+import { type TermTableItem, type TermDetail, getTemplateTermsForStrategy, midInvestmentTerms, postInvestmentTerms } from "@/components/pages/term-sheet"
 import { getTemplateMaterialsForStrategy } from "@/components/pages/project-materials"
 import { getTrackStrategyHypothesisTemplate } from "@/components/pages/strategy-hypotheses"
 import { getTrackStrategyTermTemplate } from "@/components/pages/strategy-terms"
@@ -334,6 +334,10 @@ export default function Page() {
             time: new Date().toISOString().split("T")[0],
           },
         }))
+        // Update project card status to 已退出
+        setProjects((prev) => prev.map((p) =>
+          p.id === projectId ? { ...p, status: "已退出", statusColor: getStatusColor("已退出") } : p
+        ))
         setPendingPhases(pendingPhases.filter((p) => p.id !== id))
         setView({ type: "project-detail", projectId })
         return
@@ -353,6 +357,18 @@ export default function Page() {
         ...projectPhases,
         [projectId]: [...updatedPhases, newPhase],
       })
+      // Update project card status based on the new phase's groupLabel
+      const phaseStatusMap: Record<string, string> = {
+        "投前期": "投前期",
+        "投中期": "投中期",
+        "投后期": "投后期",
+      }
+      const newStatus = phaseStatusMap[phase.groupLabel]
+      if (newStatus) {
+        setProjects((prev) => prev.map((p) =>
+          p.id === projectId ? { ...p, status: newStatus, statusColor: getStatusColor(newStatus) } : p
+        ))
+      }
       // When a 立项 phase is approved, store the 立项 record for display in the workflow
       if (changeType === "立项") {
         setLiXiangRecords((prev) => ({
@@ -396,6 +412,7 @@ export default function Page() {
         }
       }
       // When a 划款 phase is approved, store the 划款 record for display in the workflow
+      // and add post-investment terms with statuses (4 rejected, rest approved)
       if (changeType === "划款") {
         setHuaKuanRecords((prev) => ({
           ...prev,
@@ -407,6 +424,20 @@ export default function Page() {
             time: new Date().toISOString().split("T")[0],
           },
         }))
+        // Add post-investment terms (控制权与治理稳定 + 激励与长期一致性) when entering 投后期
+        // Then set statuses: 4 rejected (否决), rest approved (通过)
+        const currentTerms = projectTerms[projectId] || []
+        const hasAlreadyAdded = currentTerms.some((t) => t.id.startsWith("post-t"))
+        if (!hasAlreadyAdded) {
+          const combined = [...currentTerms, ...postInvestmentTerms]
+          const totalTerms = combined.length
+          // Last 4 terms → rejected, rest → approved
+          const withStatuses = combined.map((t, idx) => ({
+            ...t,
+            status: (idx >= totalTerms - 4 ? "rejected" : "approved") as "approved" | "pending" | "rejected",
+          }))
+          setProjectTerms((prev) => ({ ...prev, [projectId]: withStatuses }))
+        }
       }
       setPendingPhases(pendingPhases.filter((p) => p.id !== id))
 

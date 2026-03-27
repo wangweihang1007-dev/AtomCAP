@@ -1149,6 +1149,7 @@ interface HypothesisChecklistProps {
   isInDuration?: boolean
   isExited?: boolean
   isMidInvestment?: boolean
+  isPostInvestment?: boolean
   project?: { strategyId?: string; strategyName?: string; id?: string; name?: string }
   projectMaterials?: StrategyMaterial[]
   inheritedHypotheses?: HypothesisTableItem[]
@@ -1159,7 +1160,7 @@ interface HypothesisChecklistProps {
   onCreateVerification?: (hypothesisId: string, hypothesisName: string, data: VerificationFormData) => void
 }
 
-export function HypothesisChecklist({ isNewProject = false, isInDuration = false, isExited = false, isMidInvestment = false, project, projectMaterials, inheritedHypotheses, extraDetails, onAddValuePoint, onAddRiskPoint, onCreateCommitteeDecision, onCreateVerification }: HypothesisChecklistProps) {
+export function HypothesisChecklist({ isNewProject = false, isInDuration = false, isExited = false, isMidInvestment = false, isPostInvestment = false, project, projectMaterials, inheritedHypotheses, extraDetails, onAddValuePoint, onAddRiskPoint, onCreateCommitteeDecision, onCreateVerification }: HypothesisChecklistProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
@@ -2341,6 +2342,8 @@ export function HypothesisChecklist({ isNewProject = false, isInDuration = false
             <h1 className="text-2xl font-bold text-[#111827]">假设清单</h1>
             {isExited ? (
               <p className="mt-1 text-sm text-[#EF4444] font-medium">项目已退出，所有信息不可更改。</p>
+            ) : isPostInvestment ? (
+              <p className="mt-1 text-sm text-[#D97706] font-medium">项目已进入投后期，不可新建或删除假设，现有假设仍可更改。</p>
             ) : isMidInvestment ? (
               <p className="mt-1 text-sm text-[#D97706] font-medium">项目已进入投中期，不可新建假设，现有假设仍可更改。</p>
             ) : (
@@ -2419,13 +2422,15 @@ export function HypothesisChecklist({ isNewProject = false, isInDuration = false
                         <Eye className="h-3 w-3" />
                         详情
                       </button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-[#EF4444] hover:bg-[#FEF2F2] rounded transition-colors"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        删除
-                      </button>
+                      {!isPostInvestment && !isExited && (
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-[#EF4444] hover:bg-[#FEF2F2] rounded transition-colors"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          删除
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
