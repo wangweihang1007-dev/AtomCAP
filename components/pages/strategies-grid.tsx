@@ -155,6 +155,7 @@ export const initialStrategies: Strategy[] = [
     owner: { id: "lisi", name: "李四", initials: "李四" },
     createdAt: "2023-07-20",
     tags: ["大模型", "应用"],
+    frameworkName: "科技成长型框架",
     parentStrategyId: "1",
     parentStrategyName: "AI基础设施",
   },
@@ -170,6 +171,7 @@ export const initialStrategies: Strategy[] = [
     owner: { id: "wangfang", name: "王芳", initials: "王芳" },
     createdAt: "2023-02-20",
     tags: ["企业", "数字化"],
+    frameworkName: "价值投资评估框架",
   },
   {
     id: "3",
@@ -182,6 +184,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+25%",
     owner: { id: "wangfang", name: "王芳", initials: "王芳" },
     createdAt: "2023-03-10",
+    frameworkName: "早期项目筛选框架",
     parentStrategyId: "7",
     parentStrategyName: "企业数字化",
   },
@@ -196,6 +199,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+12%",
     owner: { id: "zhaoqiang", name: "赵强", initials: "赵强" },
     createdAt: "2023-09-05",
+    frameworkName: "早期项目筛选框架",
   },
   {
     id: "8",
@@ -208,6 +212,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+28%",
     owner: { id: "lisi", name: "李四", initials: "李四" },
     createdAt: "2023-04-10",
+    frameworkName: "ESG合规审查框架",
   },
   {
     id: "5",
@@ -220,6 +225,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+28%",
     owner: { id: "lisi", name: "李四", initials: "李四" },
     createdAt: "2023-05-18",
+    frameworkName: "ESG合规审查框架",
     parentStrategyId: "8",
     parentStrategyName: "清洁能源",
   },
@@ -234,6 +240,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+22%",
     owner: { id: "chenzong", name: "陈总", initials: "陈总" },
     createdAt: "2023-07-15",
+    frameworkName: "并购整合分析框架",
   },
   {
     id: "6",
@@ -246,6 +253,7 @@ export const initialStrategies: Strategy[] = [
     returnRate: "+22%",
     owner: { id: "chenzong", name: "陈总", initials: "陈总" },
     createdAt: "2023-08-25",
+    frameworkName: "并购整合分析框架",
     parentStrategyId: "9",
     parentStrategyName: "国际贸易",
   },
@@ -752,12 +760,14 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
                 <h3 className="text-base font-semibold text-[#111827] mb-2">
                   {strategy.name}
                 </h3>
-                <div className="mb-2">
-                  <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-medium text-blue-700">
-                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                    {strategy.frameworkName || "暂无框架"}
-                  </span>
-                </div>
+                {strategy.frameworkName && (
+                  <div className="mb-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 border border-blue-200 px-2.5 py-1 text-[11px] font-medium text-blue-700">
+                      <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      依托分析框架：{strategy.frameworkName}
+                    </span>
+                  </div>
+                )}
                 <p className="text-xs text-[#6B7280] mb-3 leading-relaxed">
                   {strategy.description}
                 </p>
