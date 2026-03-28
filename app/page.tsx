@@ -170,11 +170,12 @@ export default function Page() {
           id: `sm-${newStrategyId}-${idx}`,
           strategyId: newStrategyId,
           name: m.name,
-          type: m.type as "PDF" | "Word" | "Excel" | "PPT" | "其他",
+          format: m.type || "PDF", // map type to format, default to PDF if undefined
           size: m.size,
-          uploadedBy: "张伟",
-          uploadedAt: new Date().toISOString().split("T")[0],
+          description: "",
           category: "通用材料",
+          owner: "张伟",
+          createdAt: new Date().toISOString().split("T")[0],
         }))
         setStrategyMaterials((prev) => ({ ...prev, [newStrategyId]: newMaterials }))
       }
