@@ -121,11 +121,49 @@ export default function Page() {
   function handleApproveStrategy(id: string) {
     const pending = pendingStrategies.find((p) => p.id === id)
     if (pending) {
+      const newStrategyId = `new-${Date.now()}`
       const newStrategy: Strategy = {
-        id: `new-${Date.now()}`,
+        id: newStrategyId,
         ...pending.strategy,
       }
       setStrategies([newStrategy, ...strategies])
+      
+      // Initialize hypotheses for the new strategy if generated during creation
+      if (pending.generatedHypotheses && pending.generatedHypotheses.length > 0) {
+        const newHypotheses: StrategyHypothesis[] = pending.generatedHypotheses.map((h, idx) => ({
+          id: `sh-${newStrategyId}-${idx}`,
+          strategyId: newStrategyId,
+          direction: h.direction,
+          category: h.category,
+          name: h.name,
+          content: "",
+          reason: "",
+          status: "pending" as const,
+          owner: "AI生成",
+          createdAt: new Date().toISOString().split("T")[0],
+          updatedAt: new Date().toISOString().split("T")[0],
+        }))
+        setStrategyHypotheses((prev) => ({ ...prev, [newStrategyId]: newHypotheses }))
+      }
+      
+      // Initialize terms for the new strategy if generated during creation
+      if (pending.generatedTerms && pending.generatedTerms.length > 0) {
+        const newTerms: StrategyTerm[] = pending.generatedTerms.map((t, idx) => ({
+          id: `st-${newStrategyId}-${idx}`,
+          strategyId: newStrategyId,
+          direction: t.direction,
+          category: t.category,
+          name: t.name,
+          content: "",
+          reason: "",
+          status: "pending" as const,
+          owner: "AI生成",
+          createdAt: new Date().toISOString().split("T")[0],
+          updatedAt: new Date().toISOString().split("T")[0],
+        }))
+        setStrategyTerms((prev) => ({ ...prev, [newStrategyId]: newTerms }))
+      }
+      
       setPendingStrategies(pendingStrategies.filter((p) => p.id !== id))
     }
   }

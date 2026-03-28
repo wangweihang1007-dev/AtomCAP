@@ -51,6 +51,9 @@ export interface PendingStrategy {
   initiator: { id: string; name: string; initials: string }
   initiatedAt: string
   reviewers: { id: string; name: string; initials: string }[]
+  // Generated content from AI during creation
+  generatedHypotheses?: { direction: string; category: string; name: string }[]
+  generatedTerms?: { direction: string; category: string; name: string }[]
 }
 
 export interface StrategyHypothesis {
@@ -557,7 +560,13 @@ function CreateStrategyStep1({
 /* ------------------------------------------------------------------ */
 /*  Create Strategy Page (full-page, multi-step)                       */
 /* ------------------------------------------------------------------ */
-function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void; onSave: (s: Omit<Strategy, "id">) => void; strategies: Strategy[] }) {
+export interface CreateStrategyResult {
+  strategy: Omit<Strategy, "id">
+  generatedHypotheses: { direction: string; category: string; name: string }[]
+  generatedTerms: { direction: string; category: string; name: string }[]
+}
+
+function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void; onSave: (result: CreateStrategyResult) => void; strategies: Strategy[] }) {
   const [step, setStep] = useState(1)
 
   // Step 1 state
@@ -679,17 +688,29 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
 
   function handleSave() {
     onSave({
-      name: name.trim(),
-      icon: Cpu,
-      iconBg: "bg-blue-100 text-blue-600",
-      description: description.trim() || "暂无策略简介",
-      projectCount: 0,
-      totalInvest: "0",
-      returnRate: "+0%",
-      owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
-      createdAt: new Date().toISOString().split("T")[0],
-      tags,
-      frameworkName: selectedFramework,
+      strategy: {
+        name: name.trim(),
+        icon: Cpu,
+        iconBg: "bg-blue-100 text-blue-600",
+        description: description.trim() || "暂无策略简介",
+        projectCount: 0,
+        totalInvest: "0",
+        returnRate: "+0%",
+        owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
+        createdAt: new Date().toISOString().split("T")[0],
+        tags,
+        frameworkName: selectedFramework,
+      },
+      generatedHypotheses: generatedHypotheses.map((h) => ({
+        direction: h.direction,
+        category: h.category,
+        name: h.name,
+      })),
+      generatedTerms: generatedTerms.map((t) => ({
+        direction: t.direction,
+        category: t.category,
+        name: t.name,
+      })),
     })
   }
 
@@ -745,7 +766,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
 
           {step === 2 && (
             <div>
-              <h1 className="text-xl font-bold text-[#111827] mb-2">配置数据来源</h1>
+              <h1 className="text-xl font-bold text-[#111827] mb-2">配置��据来源</h1>
               <p className="text-sm text-[#6B7280] mb-6">
                 上传相关材料，AI 将基于这些数据生成投资策略
               </p>
@@ -1025,7 +1046,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h1 className="text-xl font-bold text-[#111827]">策略审核</h1>
+                      <h1 className="text-xl font-bold text-[#111827]">策略审���</h1>
                       <p className="mt-1 text-sm text-[#6B7280]">
                         审核 AI 生成的假设和条款，可进行编辑、删除或新增
                       </p>
@@ -1252,12 +1273,32 @@ export function StrategiesGrid({ strategies, onStrategiesChange, onSelectStrateg
       s.description.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  function handleSaveStrategy(data: Omit<Strategy, "id">) {
-    const newStrategy: Strategy = {
-      ...data,
-      id: `s-${Date.now()}`,
+  function handleSaveStrategy(result: CreateStrategyResult) {
+    if (onCreatePending) {
+      // Create a pending strategy change request with generated content
+      const pendingStrategy: PendingStrategy = {
+        id: `ps-${Date.now()}`,
+        strategy: result.strategy,
+        changeId: `CR-${Date.now().toString().slice(-6)}`,
+        changeName: `新建策略：${result.strategy.name}`,
+        initiator: { id: "zhangwei", name: "张伟", initials: "张伟" },
+        initiatedAt: new Date().toISOString().split("T")[0],
+        reviewers: [
+          { id: "lisi", name: "李四", initials: "李四" },
+          { id: "wangwu", name: "王五", initials: "王五" },
+        ],
+        generatedHypotheses: result.generatedHypotheses,
+        generatedTerms: result.generatedTerms,
+      }
+      onCreatePending(pendingStrategy)
+    } else {
+      // Fallback: directly add the strategy
+      const newStrategy: Strategy = {
+        ...result.strategy,
+        id: `s-${Date.now()}`,
+      }
+      onStrategiesChange([newStrategy, ...strategies])
     }
-    onStrategiesChange([newStrategy, ...strategies])
     setView("list")
   }
 
