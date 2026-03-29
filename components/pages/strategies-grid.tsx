@@ -234,7 +234,7 @@ export const initialStrategies: Strategy[] = [
     name: "国际贸易",
     icon: TrendingUp,
     iconBg: "bg-amber-100 text-amber-600",
-    description: "聚焦跨境贸易、全球供应链和国际化业务拓展",
+    description: "聚焦跨境贸���、全球供应链和国际化业务拓展",
     projectCount: 9,
     totalInvest: "6.3亿",
     returnRate: "+22%",
@@ -594,6 +594,10 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
   const [analysisComplete, setAnalysisComplete] = useState(false)
   const [reviewTab, setReviewTab] = useState<"materials" | "hypotheses" | "terms">("hypotheses")
   const [reviewSearchQuery, setReviewSearchQuery] = useState("")
+  
+  // Detail view state
+  const [viewingHypothesisDetail, setViewingHypothesisDetail] = useState<string | null>(null)
+  const [viewingTermDetail, setViewingTermDetail] = useState<string | null>(null)
 
   // Generated hypotheses and terms (mirrors AI基础设施 preset)
   const [generatedHypotheses] = useState([
@@ -1136,7 +1140,11 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
                               <p className="text-sm font-medium text-[#111827] truncate">{h.name}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#2563EB] transition-colors" title="查看详情">
+                              <button 
+                                onClick={() => setViewingHypothesisDetail(h.id)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#2563EB] transition-colors" 
+                                title="查看详情"
+                              >
                                 <Eye className="h-4 w-4" />
                               </button>
                               <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#F59E0B] transition-colors" title="编辑">
@@ -1175,7 +1183,11 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
                               <p className="text-sm font-medium text-[#111827] truncate">{t.name}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#2563EB] transition-colors" title="查看详情">
+                              <button 
+                                onClick={() => setViewingTermDetail(t.id)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#2563EB] transition-colors" 
+                                title="查看详情"
+                              >
                                 <Eye className="h-4 w-4" />
                               </button>
                               <button className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#F59E0B] transition-colors" title="编辑">
@@ -1277,6 +1289,237 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
           )}
         </div>
       </div>
+
+      {/* Hypothesis Detail Modal */}
+      {viewingHypothesisDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-3xl max-h-[85vh] rounded-2xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4 bg-gradient-to-r from-blue-50 to-violet-50">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
+                  <Target className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#111827]">假设详情</h2>
+                  <p className="text-xs text-[#6B7280]">查看假设的完整信息</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewingHypothesisDetail(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-white/80 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-6">
+              {(() => {
+                const h = generatedHypotheses.find(h => h.id === viewingHypothesisDetail)
+                if (!h) return null
+                
+                // Get detailed content for the specific hypothesis
+                const isAIChipHypothesis = h.name === "国产AI芯片在推理场景下可替代英伟达方案"
+                
+                return (
+                  <div className="space-y-6">
+                    {/* Basic Info */}
+                    <div>
+                      <h3 className="text-xl font-semibold text-[#111827] mb-3">{h.name}</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-md bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-medium text-blue-700">{h.direction}</span>
+                        <span className="rounded-md bg-violet-50 border border-violet-200 px-2.5 py-1 text-xs font-medium text-violet-700">{h.category}</span>
+                        <span className="text-xs text-[#9CA3AF]">创建于 {h.createdAt}</span>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                      <h4 className="text-sm font-medium text-[#374151] mb-2">假设描述</h4>
+                      <p className="text-sm text-[#6B7280] leading-relaxed">
+                        {isAIChipHypothesis 
+                          ? "基于国内AI芯片产业发展现状，我们认为在推理场景（而非训练场景）下，国产AI芯片有望在特定应用领域实现对英伟达方案的替代。这一判断基于推理任务对算力精度要求相对较低、国内厂商在推理芯片领域的持续突破，以及政策对国产替代的支持力度。"
+                          : "该假设描述了在当前技术和市场环境下的核心判断，需要通过多维度验证来确认其有效性。"
+                        }
+                      </p>
+                    </div>
+
+                    {/* Verification Criteria */}
+                    <div>
+                      <h4 className="text-sm font-medium text-[#374151] mb-3">验证标准</h4>
+                      <div className="space-y-2">
+                        {(isAIChipHypothesis ? [
+                          { label: "技术性能对比", desc: "推理延迟、吞吐量达到英伟达同级产品80%以上" },
+                          { label: "成本优势", desc: "单位算力成本较英伟达方案降低30%以上" },
+                          { label: "生态成熟度", desc: "支持主流AI框架（PyTorch、TensorFlow）的原生适配" },
+                          { label: "商业化案例", desc: "至少3家规模以上客户实现生产环境部署" },
+                        ] : [
+                          { label: "定量指标", desc: "达成预设的关键性能指标阈值" },
+                          { label: "定性指标", desc: "获得行业专家或客户的正向反馈验证" },
+                          { label: "时间窗口", desc: "在设定的时间范围内完成验证" },
+                        ]).map((criterion, idx) => (
+                          <div key={idx} className="flex items-start gap-3 rounded-lg border border-[#E5E7EB] bg-white p-3">
+                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600">
+                              {idx + 1}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-[#111827]">{criterion.label}</p>
+                              <p className="text-xs text-[#6B7280] mt-0.5">{criterion.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Related Materials */}
+                    <div>
+                      <h4 className="text-sm font-medium text-[#374151] mb-3">相关材料</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(isAIChipHypothesis ? [
+                          { name: "GPU_AI芯片行业全景报告_2024.pdf", type: "PDF" },
+                          { name: "AI芯片技术路线图_GPU_TPU_NPU.pptx", type: "PPTX" },
+                        ] : [
+                          { name: "行业分析报告.pdf", type: "PDF" },
+                        ]).map((doc, idx) => (
+                          <span key={idx} className="inline-flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#374151]">
+                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${doc.type === "PDF" ? "bg-red-50 text-red-600" : "bg-orange-50 text-orange-600"}`}>
+                              {doc.type}
+                            </span>
+                            {doc.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 border-t border-[#E5E7EB] px-6 py-4 bg-[#F9FAFB]">
+              <button
+                onClick={() => setViewingHypothesisDetail(null)}
+                className="rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827]"
+              >
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Term Detail Modal */}
+      {viewingTermDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-3xl max-h-[85vh] rounded-2xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4 bg-gradient-to-r from-emerald-50 to-amber-50">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
+                  <Briefcase className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#111827]">条款详情</h2>
+                  <p className="text-xs text-[#6B7280]">查看条款的完整信息</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewingTermDetail(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] hover:bg-white/80 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-6">
+              {(() => {
+                const t = generatedTerms.find(t => t.id === viewingTermDetail)
+                if (!t) return null
+                
+                // Get detailed content for the specific term
+                const isBoardSeatTerm = t.name === "投资方有权委派一名董事参与公司董事会"
+                
+                return (
+                  <div className="space-y-6">
+                    {/* Basic Info */}
+                    <div>
+                      <h3 className="text-xl font-semibold text-[#111827] mb-3">{t.name}</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-medium text-emerald-700">{t.direction}</span>
+                        <span className="rounded-md bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-medium text-amber-700">{t.category}</span>
+                        <span className="text-xs text-[#9CA3AF]">创建于 {t.createdAt}</span>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                      <h4 className="text-sm font-medium text-[#374151] mb-2">条款描述</h4>
+                      <p className="text-sm text-[#6B7280] leading-relaxed">
+                        {isBoardSeatTerm 
+                          ? "投资方有权向公司董事会委派一名董事，参与公司重大经营决策。该董事享有与其他董事同等的投票权和知情权，公司应确保该董事能够及时获取董事会相关会议通知、议程及材料。"
+                          : "该条款明确了投资方与被投企业之间的权利义务关系，是保障投资方权益的重要法律文件组成部分。"
+                        }
+                      </p>
+                    </div>
+
+                    {/* Key Points */}
+                    <div>
+                      <h4 className="text-sm font-medium text-[#374151] mb-3">关键要点</h4>
+                      <div className="space-y-2">
+                        {(isBoardSeatTerm ? [
+                          { label: "委派权利", desc: "投资方有权指定一名符合条件的人员担任公司董事" },
+                          { label: "任期规定", desc: "董事任期与公司章程规定一致，投资方可随时更换委派人选" },
+                          { label: "权利保障", desc: "委派董事享有出席会议、审阅材料、参与表决等完整董事权利" },
+                          { label: "触发条件", desc: "投资方持股比例达到约定阈值时自动获得该权利" },
+                        ] : [
+                          { label: "适用范围", desc: "明确条款的适用场景和边界条件" },
+                          { label: "执行标准", desc: "条款执行的具体要求和流程" },
+                          { label: "例外情况", desc: "特殊情况下的处理方式" },
+                        ]).map((point, idx) => (
+                          <div key={idx} className="flex items-start gap-3 rounded-lg border border-[#E5E7EB] bg-white p-3">
+                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-medium text-emerald-600">
+                              {idx + 1}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-[#111827]">{point.label}</p>
+                              <p className="text-xs text-[#6B7280] mt-0.5">{point.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Standard Clause Text */}
+                    <div>
+                      <h4 className="text-sm font-medium text-[#374151] mb-3">标准条款文本</h4>
+                      <div className="rounded-xl border border-[#E5E7EB] bg-[#FFFBEB] p-4">
+                        <p className="text-sm text-[#92400E] leading-relaxed font-mono">
+                          {isBoardSeatTerm 
+                            ? "甲方（投资方）有权向公司董事会委派一（1）名董事。公司应在甲方书面通知后十五（15）个工作日内完成相关工商变更登记。甲方委派的董事享有与公司其他董事同等的权利和义务，包括但不限于出席董事会会议、参与表决、查阅公司资料等。"
+                            : "【标准条款文本将根据具体条款类型自动生成】"
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 border-t border-[#E5E7EB] px-6 py-4 bg-[#F9FAFB]">
+              <button
+                onClick={() => setViewingTermDetail(null)}
+                className="rounded-lg bg-[#1F2937] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#111827]"
+              >
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
