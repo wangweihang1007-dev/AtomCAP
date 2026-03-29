@@ -247,7 +247,7 @@ export const initialStrategies: Strategy[] = [
     name: "出海电商",
     icon: Target,
     iconBg: "bg-amber-100 text-amber-600",
-    description: "跨境电商平台、品牌出海和供应链服务生态",
+    description: "跨境电商平台���品牌出海和供应链服务生态",
     projectCount: 9,
     totalInvest: "6.3亿",
     returnRate: "+22%",
@@ -607,10 +607,10 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
   ])
 
   const [generatedTerms] = useState([
-    { id: "gen-t1", direction: "投资保护条款", category: "信息权", name: "投资方有权获取被投企业月度财务报告", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
-    { id: "gen-t2", direction: "投资保护条款", category: "信息权", name: "投资方有权对重大技术决策进行知情和建议", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
-    { id: "gen-t3", direction: "投资保护条款", category: "反稀释条款", name: "采用完全棘轮反稀释条款保护投资方权益", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
-    { id: "gen-t4", direction: "控制权条款", category: "董事会席位", name: "投资方有权委派一名董事参与公司董事会", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t1", direction: "控制权条款", category: "董事会席位", name: "投资方有权委派一名董事参与公司董事会", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t2", direction: "投资保护条款", category: "信息权", name: "投资方有权获取被投企业月度财务报告", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t3", direction: "投资保护条款", category: "信息权", name: "投资方有权对重大技术决策进行知情和建议", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t4", direction: "投资保护条款", category: "反稀释条款", name: "采用完全棘轮反稀释条款保护投资方权益", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
     { id: "gen-t5", direction: "控制权条款", category: "重大事项否决权", name: "对核心技术IP转让和授权享有一票否决权", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
     { id: "gen-t6", direction: "退出条款", category: "回购条款", name: "若公司未能在5年内实现IPO，投资方有权要求回购", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
   ])
