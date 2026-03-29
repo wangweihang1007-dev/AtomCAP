@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf, X, Check, MoreHorizontal, ChevronRight, ArrowLeft, Upload, Folder, Eye, Pencil, Trash2 } from "lucide-react"
+import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf, X, Check, MoreHorizontal, ChevronRight, ArrowLeft, Upload, Folder, Eye, Pencil, Trash2, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -234,7 +234,7 @@ export const initialStrategies: Strategy[] = [
     name: "国际贸易",
     icon: TrendingUp,
     iconBg: "bg-amber-100 text-amber-600",
-    description: "聚焦跨境贸易、全��供应链和国际化业务拓展",
+    description: "聚焦跨境贸易、全���供应链和国际化业务拓展",
     projectCount: 9,
     totalInvest: "6.3亿",
     returnRate: "+22%",
