@@ -624,9 +624,9 @@ function CreateFrameworkPicker({ onBack, onNext }: { onBack: () => void; onNext:
             </div>
             <h3 className="text-lg font-bold text-[#111827] mb-2">手动创建</h3>
             <p className="text-sm text-[#6B7280] leading-relaxed mb-6">
-              从平台提供的维度库中选取分析维度，或从零开始自定义每个维度的指标、标准和经验备注。
+              从平台提供的维度库中选取分析维度，或从零开始自定义每个维度的指标、标准和经验，结合知识图谱沉淀抽象投资方法论，以引导约束大模型的推理。
             </p>
-            <p className="mt-auto text-xs text-[#9CA3AF]">适合：已有清晰的结构化方法论的用户</p>
+            <p className="mt-auto text-xs text-[#9CA3AF]">适合：已有清晰的结构化方法论和一定经验积累的用户</p>
           </button>
         </div>
 
