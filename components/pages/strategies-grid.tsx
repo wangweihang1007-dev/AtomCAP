@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf, X, Check, MoreHorizontal, ChevronRight, ArrowLeft, Upload, Folder, Eye, Pencil, Trash2, Sparkles } from "lucide-react"
+import { Briefcase, Search, Plus, Target, TrendingUp, Building2, Cpu, Zap, Leaf, X, Check, MoreHorizontal, ChevronRight, ArrowLeft, Upload, Folder, Eye, Pencil, Trash2, Sparkles, Lightbulb, FolderOpen, FileText, Sheet, File } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -611,7 +611,7 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
   ])
 
   const [generatedTerms] = useState([
-    { id: "gen-t1", direction: "控制权条款", category: "董事会席位", name: "投资方有权委派一名董事参与公司董事会", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
+    { id: "gen-t1", direction: "控制权条款", category: "董事会席位", name: "投资方有权委派一名董事进入公司董事会", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
     { id: "gen-t2", direction: "投资保护条款", category: "信息权", name: "投资方有权获取被投企业月度财务报告", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
     { id: "gen-t3", direction: "投资保护条款", category: "信息权", name: "投资方有权对重大技术决策进行知情和建议", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
     { id: "gen-t4", direction: "投资保护条款", category: "反稀释条款", name: "采用完全棘轮反稀释条款保护投资方权益", owner: "张伟", createdAt: new Date().toISOString().split("T")[0], status: "pending" },
@@ -1314,147 +1314,96 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
             </div>
 
             {/* Modal Content */}
-            <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-6">
+            <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-6 space-y-4">
               {(() => {
                 const h = generatedHypotheses.find(h => h.id === viewingHypothesisDetail)
                 if (!h) return null
-                
-                // Get detailed content for the specific hypothesis
-                const isAIChipHypothesis = h.name === "国产AI芯片在推理场景下可替代英伟达方案"
-                
+
+                const HYPOTHESIS_DETAILS: Record<string, { description: string; recommendation: string; materials: { name: string; format: string }[] }> = {
+                  "国产AI芯片在推理场景下可替代英伟达方案": {
+                    description: "随着国产AI芯片技术的持续进步，在特定推理场景下，国产芯片的性价比和能效比已接近或达到英伟达方案的水平。目前国产芯片在INT8推理性能上已达到A100的80%，能效比在特定场景下甚至优于英伟达方案，价格约为进口方案的60%，成本优势显著。主要短板在于软件生态尚不完善，但随着国产化生态建设提速，整体替代可行性正在持续提升。",
+                    recommendation: "国产芯片替代路径正在加速验证，叠加国产化政策红利与供应链安全诉求，下游采购意愿持续提升。当前市场窗口期是布局核心标的的关键时机，该假设若得到验证，将为策略在算力芯片赛道的选标逻辑提供重要支撑，建议重点关注推理芯片性价比领先的国内厂商。",
+                    materials: [
+                      { name: "GPU_AI芯片行业全景报告_2024", format: "PDF" },
+                      { name: "云服务商GPU算力价格对比表", format: "XLSX" },
+                      { name: "AI基础设施投融资趋势报告_2023-2024", format: "PDF" },
+                    ],
+                  },
+                  "云端AI芯片市场将在3年内达到500亿美元规模": {
+                    description: "基于大模型训练和推理需求的爆发式增长，预计全球云端AI芯片市场将在2027年达到500亿美元规模。ChatGPT的成功带动大模型需求全面爆发，各大云厂商持续加大AI算力资本开支，训练芯片需求年增长率已超过50%，推理芯片市场增速更为显著，整体市场规模扩张路径清晰可见。",
+                    recommendation: "云端AI算力的结构性增长已获头部科技公司资本开支数据的明确印证，市场规模上限清晰。该假设已验证，可作为策略整体投资逻辑的宏观需求锚点，为算力赛道的标的估值提供市场容量背书，增强投资决策的确定性。",
+                    materials: [
+                      { name: "全球算力基础设施市场规模分析", format: "PDF" },
+                      { name: "AI基础设施投融资趋势报告_2023-2024", format: "PDF" },
+                      { name: "大模型训练成本结构分析", format: "XLSX" },
+                    ],
+                  },
+                }
+
+                const detail = HYPOTHESIS_DETAILS[h.name]
+                const description = detail?.description || "该假设描述了在当前技术和市场环境下的核心判断，需要通过多维度数据和调研来验证其有效性，为投资决策提供关键依据。"
+                const recommendation = detail?.recommendation || "基于当前市场环境和技术发展趋势，该假设具有较高的验证价值，建议重点关注相关赛道的核心标的和技术突破进展。"
+                const materials = detail?.materials || [{ name: "行业分析报告", format: "PDF" }]
+
+                const formatIcon = (fmt: string) => {
+                  if (fmt === "XLSX") return <Sheet className="h-4 w-4 text-emerald-600" />
+                  if (fmt === "DOCX") return <FileText className="h-4 w-4 text-blue-600" />
+                  return <File className="h-4 w-4 text-rose-500" />
+                }
+                const formatBadgeClass = (fmt: string) => {
+                  if (fmt === "XLSX") return "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  if (fmt === "DOCX") return "bg-blue-50 text-blue-700 border-blue-200"
+                  return "bg-rose-50 text-rose-700 border-rose-200"
+                }
+
                 return (
-                  <div className="space-y-6">
-                    {/* Basic Info */}
-                    <div>
-                      <h3 className="text-xl font-semibold text-[#111827] mb-3">{h.name}</h3>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-md bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-medium text-blue-700">{h.direction}</span>
-                        <span className="rounded-md bg-violet-50 border border-violet-200 px-2.5 py-1 text-xs font-medium text-violet-700">{h.category}</span>
-                        <span className="rounded-md bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-medium text-amber-700">QA-2026-001</span>
-                        <span className="text-xs text-[#9CA3AF]">创建于 {h.createdAt}</span>
+                  <>
+                    {/* Title + Description + Meta */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+                      <h1 className="text-xl font-bold text-[#111827] mb-4">{h.name}</h1>
+                      <p className="text-sm text-[#6B7280] mb-4 leading-relaxed">{description}</p>
+                      <div className="flex items-center gap-6 text-sm text-[#6B7280]">
+                        <span>负责人: {h.owner}</span>
+                        <span>创建时间: {h.createdAt}</span>
+                        <span>更新时间: {h.createdAt}</span>
                       </div>
                     </div>
 
-                    {/* Hypothesis Core Content - matching AI基础设施 style */}
-                    <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                      <h4 className="text-sm font-medium text-[#374151] mb-2">假设核心观点</h4>
-                      <p className="text-sm text-[#6B7280] leading-relaxed">
-                        {isAIChipHypothesis 
-                          ? "基于国内AI芯片产业发展现状，我们认为在推理场景（而非训练场景）下，国产AI芯片有望在特定应用领域实现对英伟达方案的替代。这一判断基于推理任务对算力精度要求相对较低、国内厂商在推理芯片领域的持续突破，以及政策对国产替代的支持力度。"
-                          : "该假设描述了在当前技术和市场环境下的核心判断，需要通过多维度验证来确认其有效性。"
-                        }
-                      </p>
+                    {/* 推荐理由 */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50">
+                          <Lightbulb className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <h2 className="text-base font-semibold text-[#111827]">推荐理由</h2>
+                      </div>
+                      <p className="text-sm text-[#374151] leading-relaxed">{recommendation}</p>
                     </div>
 
-                    {/* Value Points - matching AI基础设施 hypothesis detail */}
-                    {isAIChipHypothesis && (
-                      <div>
-                        <h4 className="text-sm font-medium text-[#374151] mb-3 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-100 text-emerald-600">
-                            <TrendingUp className="h-3 w-3" />
-                          </span>
-                          价值点
-                        </h4>
-                        <div className="space-y-2">
-                          {[
-                            "推理芯片国产替代空间巨大，预计2025年市场规模达200亿",
-                            "政策支持力度持续加大，国产芯片采购比例逐年提升",
-                            "头部云厂商已开始测试国产推理芯片，商业化进程加速",
-                          ].map((point, idx) => (
-                            <div key={idx} className="flex items-start gap-2 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
-                              <Check className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
-                              <span className="text-sm text-[#374151]">{point}</span>
-                            </div>
-                          ))}
+                    {/* 支撑材料 */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50">
+                          <FolderOpen className="h-4 w-4 text-emerald-600" />
                         </div>
+                        <h2 className="text-base font-semibold text-[#111827]">支撑材料</h2>
+                        <span className="ml-auto text-xs text-[#9CA3AF]">{materials.length} 个关联材料</span>
                       </div>
-                    )}
-
-                    {/* Risk Points - matching AI基础设施 hypothesis detail */}
-                    {isAIChipHypothesis && (
-                      <div>
-                        <h4 className="text-sm font-medium text-[#374151] mb-3 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded bg-red-100 text-red-600">
-                            <Target className="h-3 w-3" />
-                          </span>
-                          风险点
-                        </h4>
-                        <div className="space-y-2">
-                          {[
-                            "软件生态适配仍需时间，CUDA生态壁垒短期难以突破",
-                            "技术迭代速度落后英伟达1-2代，性能差距需持续关注",
-                            "供应链稳定性存在不确定性，晶圆代工产能受限",
-                          ].map((risk, idx) => (
-                            <div key={idx} className="flex items-start gap-2 rounded-lg border border-red-100 bg-red-50/50 p-3">
-                              <X className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-                              <span className="text-sm text-[#374151]">{risk}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Verification Criteria */}
-                    <div>
-                      <h4 className="text-sm font-medium text-[#374151] mb-3">验证标准</h4>
                       <div className="space-y-2">
-                        {(isAIChipHypothesis ? [
-                          { label: "技术性能对比", desc: "推理延迟、吞吐量达到英伟达同级产品80%以上" },
-                          { label: "成本优势", desc: "单位算力成本较英伟达方案降低30%以上" },
-                          { label: "生态成熟度", desc: "支持主流AI框架（PyTorch、TensorFlow）的原生适配" },
-                          { label: "商业化案例", desc: "至少3家规模以上客户实现生产环境部署" },
-                        ] : [
-                          { label: "定量指标", desc: "达成预设的关键性能指标阈值" },
-                          { label: "定性指标", desc: "获得行业专家或客户的正向反馈验证" },
-                          { label: "时间窗口", desc: "在设定的时间范围内完成验证" },
-                        ]).map((criterion, idx) => (
-                          <div key={idx} className="flex items-start gap-3 rounded-lg border border-[#E5E7EB] bg-white p-3">
-                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600">
-                              {idx + 1}
+                        {materials.map((material, idx) => (
+                          <div key={idx} className="flex items-center gap-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 transition-colors hover:bg-[#F3F4F6]">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white border border-[#E5E7EB]">
+                              {formatIcon(material.format)}
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-[#111827]">{criterion.label}</p>
-                              <p className="text-xs text-[#6B7280] mt-0.5">{criterion.desc}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Related Materials */}
-                    <div>
-                      <h4 className="text-sm font-medium text-[#374151] mb-3">相关材料</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {(isAIChipHypothesis ? [
-                          { name: "GPU_AI芯片行业全景报告_2024.pdf", type: "PDF" },
-                          { name: "AI芯片技术路线图_GPU_TPU_NPU.pptx", type: "PPTX" },
-                          { name: "国产AI芯片厂商竞争力分析.pdf", type: "PDF" },
-                        ] : [
-                          { name: "行业分析报告.pdf", type: "PDF" },
-                        ]).map((doc, idx) => (
-                          <span key={idx} className="inline-flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#374151]">
-                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${doc.type === "PDF" ? "bg-red-50 text-red-600" : "bg-orange-50 text-orange-600"}`}>
-                              {doc.type}
+                            <span className="flex-1 text-sm text-[#374151] truncate">{material.name}</span>
+                            <span className={`rounded border px-1.5 py-0.5 text-[10px] font-bold shrink-0 ${formatBadgeClass(material.format)}`}>
+                              {material.format}
                             </span>
-                            {doc.name}
-                          </span>
+                          </div>
                         ))}
                       </div>
                     </div>
-
-                    {/* Linked Terms */}
-                    {isAIChipHypothesis && (
-                      <div>
-                        <h4 className="text-sm font-medium text-[#374151] mb-3">关联条款</h4>
-                        <div className="rounded-lg border border-[#E5E7EB] bg-white p-3">
-                          <div className="flex items-center gap-2">
-                            <span className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">控制权条款</span>
-                            <span className="text-sm text-[#374151]">投资方有权委派一名董事参与公司董事会</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  </>
                 )
               })()}
             </div>
@@ -1496,138 +1445,120 @@ function CreateStrategy({ onCancel, onSave, strategies }: { onCancel: () => void
             </div>
 
             {/* Modal Content */}
-            <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-6">
+            <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-6 space-y-4">
               {(() => {
                 const t = generatedTerms.find(t => t.id === viewingTermDetail)
                 if (!t) return null
-                
-                // Get detailed content for the specific term
-                const isBoardSeatTerm = t.name === "投资方有权委派一名董事参与公司董事会"
-                
+
+                const TERM_DETAILS: Record<string, { description: string; recommendation: string; materials: { name: string; format: string }[]; relatedHypotheses: { direction: string; category: string; name: string }[] }> = {
+                  "投资方有权委派一名董事进入公司董事会": {
+                    description: "该条款规定投资方有权向公司董事会委派一名董事代表，参与公司重大决策，保护投资方的权益。核心要点包括：确保投资方在重大决策中的话语权，有助于监督公司运营和财务状况，是投资方保护性条款的核心之一，同时需明确董事的任职资格和更换流程，以保障条款的有效执行。",
+                    recommendation: "AI芯片赛道的技术路线迭代迅速，董事席位条款可确保投资方第一时间掌握被投企业的技术进展与战略调整，有效降低信息不对称风险。结合该赛道国产替代政策敏感性，建议明确董事对重大政策合规事项的知情权，增强条款的实际保护效力。",
+                    materials: [
+                      { name: "GPU_AI芯片行业全景报告_2024", format: "PDF" },
+                      { name: "AI基础设施投融资趋势报告_2023-2024", format: "PDF" },
+                    ],
+                    relatedHypotheses: [
+                      { direction: "技术攻关", category: "算力与芯片", name: "国产AI芯片在推理场景下可替代英伟达方案" },
+                      { direction: "技术攻关", category: "模型训练框架", name: "开源大模型训练框架将成为主流技术路线" },
+                    ],
+                  },
+                }
+
+                const detail = TERM_DETAILS[t.name]
+                const description = detail?.description || "该条款旨在保护投资方的核心权益，确保在重大决策中拥有适当的话语权和知情权，是投资保护条款体系的重要组成部分。"
+                const recommendation = detail?.recommendation || "基于当前投资赛道的特点和市场环境，该条款的设置有助于降低投资风险，建议在具体执行层面进一步细化相关流程和标准。"
+                const materials = detail?.materials || [{ name: "投资条款标准模板", format: "PDF" }]
+                const relatedHypotheses = detail?.relatedHypotheses || []
+
+                const formatIcon = (fmt: string) => {
+                  if (fmt === "XLSX") return <Sheet className="h-4 w-4 text-emerald-600" />
+                  if (fmt === "DOCX") return <FileText className="h-4 w-4 text-blue-600" />
+                  return <File className="h-4 w-4 text-rose-500" />
+                }
+                const formatBadgeClass = (fmt: string) => {
+                  if (fmt === "XLSX") return "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  if (fmt === "DOCX") return "bg-blue-50 text-blue-700 border-blue-200"
+                  return "bg-rose-50 text-rose-700 border-rose-200"
+                }
+
                 return (
-                  <div className="space-y-6">
-                    {/* Basic Info */}
-                    <div>
-                      <h3 className="text-xl font-semibold text-[#111827] mb-3">{t.name}</h3>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-medium text-emerald-700">{t.direction}</span>
-                        <span className="rounded-md bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-medium text-amber-700">{t.category}</span>
-                        <span className="rounded-md bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-medium text-blue-700">TM-2026-001</span>
-                        <span className="text-xs text-[#9CA3AF]">创建于 {t.createdAt}</span>
+                  <>
+                    {/* Title + Description + Meta */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+                      <h1 className="text-xl font-bold text-[#111827] mb-4">{t.name}</h1>
+                      <p className="text-sm text-[#6B7280] mb-4 leading-relaxed">{description}</p>
+                      <div className="flex items-center gap-6 text-sm text-[#6B7280]">
+                        <span>负责人: {t.owner}</span>
+                        <span>创建时间: {t.createdAt}</span>
+                        <span>更新时间: {t.createdAt}</span>
                       </div>
                     </div>
 
-                    {/* Our Demand - matching AI基础设施 term-sheet style */}
-                    {isBoardSeatTerm && (
-                      <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4">
-                        <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-100">
-                            <Target className="h-3 w-3 text-blue-600" />
-                          </span>
-                          我方诉求
-                        </h4>
-                        <p className="text-sm text-[#374151] leading-relaxed">
-                          投资方要求在公司董事会中获得一个正式董事席位，该董事享有与其他董事同等的表决权和知情权，参与公司所有重大经营决策的审议和表决。
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="inline-flex items-center gap-1.5 rounded border border-blue-200 bg-white px-2 py-1 text-xs text-[#374151]">
-                            <span className="rounded bg-red-50 px-1 py-0.5 text-[10px] font-bold text-red-600">PDF</span>
-                            投资条款清单_v1.pdf
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 rounded border border-blue-200 bg-white px-2 py-1 text-xs text-[#374151]">
-                            <span className="rounded bg-blue-50 px-1 py-0.5 text-[10px] font-bold text-blue-600">DOCX</span>
-                            董事会席位要求说明.docx
-                          </span>
+                    {/* 推荐理由 */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50">
+                          <FileText className="h-4 w-4 text-amber-600" />
                         </div>
+                        <h2 className="text-base font-semibold text-[#111827]">推荐理由</h2>
                       </div>
-                    )}
-
-                    {/* Our Basis - matching AI基础设施 term-sheet style */}
-                    {isBoardSeatTerm && (
-                      <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
-                        <h4 className="text-sm font-medium text-emerald-800 mb-2 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-100">
-                            <Check className="h-3 w-3 text-emerald-600" />
-                          </span>
-                          我方依据
-                        </h4>
-                        <p className="text-sm text-[#374151] leading-relaxed">
-                          基于本轮投资金额（5000万美元）及持股比例（15%），按照行业惯例，该投资规模的股东通常可获得董事会席位。参考同类型投资案例，如红杉资本在字节跳动B轮的类似安排。此外，作为战略投资方，我们的行业资源和技术能力可为公司发展提供重要支持，董事席位有助于更好地发挥协同效应。
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Bilateral Conflict - matching AI基础设施 term-sheet style */}
-                    {isBoardSeatTerm && (
-                      <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
-                        <h4 className="text-sm font-medium text-amber-800 mb-2 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-100">
-                            <X className="h-3 w-3 text-amber-600" />
-                          </span>
-                          双边冲突点
-                        </h4>
-                        <p className="text-sm text-[#374151] leading-relaxed">
-                          创始团队担忧：1）外部董事可能干预公司日常运营决策，影响管理层独立性；2）涉及核心技术和商业机密的讨论可能因外部董事参与而存在信息泄露风险；3）董事会决策效率可能因新增成员而降低。公司律师建议限制投资方董事的表决事项范围。
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Our Bottom Line - matching AI基础设施 term-sheet style */}
-                    {isBoardSeatTerm && (
-                      <div className="rounded-xl border border-red-200 bg-red-50/50 p-4">
-                        <h4 className="text-sm font-medium text-red-800 mb-2 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded bg-red-100">
-                            <Target className="h-3 w-3 text-red-600" />
-                          </span>
-                          我方底线
-                        </h4>
-                        <p className="text-sm text-[#374151] leading-relaxed">
-                          必须获得至少一个董事会席位，且该席位必须是正式董事而非观察员。董事必须有权参与所有重大事项的表决，包括但不限于：年度预算审批、重大投资决策、核心高管任免、关联交易审批等。不接受仅限于特定事项的表决权限制。
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Compromise Space - matching AI基础设施 term-sheet style */}
-                    {isBoardSeatTerm && (
-                      <div className="rounded-xl border border-violet-200 bg-violet-50/50 p-4">
-                        <h4 className="text-sm font-medium text-violet-800 mb-2 flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded bg-violet-100">
-                            <Briefcase className="h-3 w-3 text-violet-600" />
-                          </span>
-                          妥协空间
-                        </h4>
-                        <p className="text-sm text-[#374151] leading-relaxed">
-                          可接受的妥协方案：1）同意签署严格的保密协议，明确信息使用范围和泄露责任；2）同意在涉及创始人个人利益的事项上回避表决；3）同意首年仅以观察员身份参与，但需在协议中明确一年后自动转为正式董事；4）可考虑将部分敏感技术讨论单独安排，投资方董事不参与该部分会议。
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Standard Clause Text */}
-                    <div>
-                      <h4 className="text-sm font-medium text-[#374151] mb-3">标准条款文本</h4>
-                      <div className="rounded-xl border border-[#E5E7EB] bg-[#FFFBEB] p-4">
-                        <p className="text-sm text-[#92400E] leading-relaxed font-mono">
-                          {isBoardSeatTerm 
-                            ? "甲方（投资方）有权向公司董事会委派一（1）名董事。公司应在甲方书面通知后十五（15）个工作日内完成相关工商变更登记。甲方委派的董事享有与公司其他董事同等的权利和义务，包括但不限于出席董事会会议、参与表决、查阅公司资料等。"
-                            : "【标准条款文本将根据具体条款类型自动生成】"
-                          }
-                        </p>
-                      </div>
+                      <p className="text-sm text-[#374151] leading-relaxed">{recommendation}</p>
                     </div>
 
-                    {/* Linked Hypothesis */}
-                    {isBoardSeatTerm && (
-                      <div>
-                        <h4 className="text-sm font-medium text-[#374151] mb-3">关联假设</h4>
-                        <div className="rounded-lg border border-[#E5E7EB] bg-white p-3">
-                          <div className="flex items-center gap-2">
-                            <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">技术假设</span>
-                            <span className="text-sm text-[#374151]">国产AI芯片在推理场景下可替代英伟达方案</span>
+                    {/* 支撑材料 */}
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50">
+                          <FolderOpen className="h-4 w-4 text-emerald-600" />
+                        </div>
+                        <h2 className="text-base font-semibold text-[#111827]">支撑材料</h2>
+                        <span className="ml-auto text-xs text-[#9CA3AF]">{materials.length} 个关联材料</span>
+                      </div>
+                      <div className="space-y-2">
+                        {materials.map((material, idx) => (
+                          <div key={idx} className="flex items-center gap-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 transition-colors hover:bg-[#F3F4F6]">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white border border-[#E5E7EB]">
+                              {formatIcon(material.format)}
+                            </div>
+                            <span className="flex-1 text-sm text-[#374151] truncate">{material.name}</span>
+                            <span className={`rounded border px-1.5 py-0.5 text-[10px] font-bold shrink-0 ${formatBadgeClass(material.format)}`}>
+                              {material.format}
+                            </span>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 关联假设 */}
+                    {relatedHypotheses.length > 0 && (
+                      <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50">
+                            <Lightbulb className="h-4 w-4 text-amber-600" />
+                          </div>
+                          <h2 className="text-base font-semibold text-[#111827]">关联假设</h2>
+                          <span className="ml-auto text-xs text-[#9CA3AF]">{relatedHypotheses.length} 个关联假设</span>
+                        </div>
+                        <div className="space-y-2">
+                          {relatedHypotheses.map((hyp, idx) => (
+                            <div key={idx} className="flex items-center gap-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50">
+                                <Lightbulb className="h-4 w-4 text-amber-500" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[#374151] truncate">{hyp.name}</p>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">{hyp.direction}</span>
+                                  <span className="rounded bg-violet-50 px-1.5 py-0.5 text-[10px] font-medium text-violet-700">{hyp.category}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
-                  </div>
+                  </>
                 )
               })()}
             </div>

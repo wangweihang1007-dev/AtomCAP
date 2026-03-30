@@ -251,7 +251,33 @@ export function StrategyHypotheses({
     )
   })
 
-  const selectedDetail = selectedId ? hypothesisDetails[selectedId] : null
+  // 获取假设详情（从 mock 数据或按名称匹配已审批假设）
+  function getHypothesisDetail(id: string): HypothesisDetail | null {
+    if (hypothesisDetails[id]) return hypothesisDetails[id]
+    // 根据名称匹配 — 新策略的假设 ID 与 mock 不同，但名称一致
+    const item = allHypotheses.find((h) => h.id === id)
+    if (item) {
+      const detailByName = Object.values(hypothesisDetails).find((d) => d.title === item.name)
+      if (detailByName) return { ...detailByName, id }
+    }
+    // 从 approved 假设构建基本详情
+    const approved = hypotheses.find((h) => h.id === id)
+    if (approved) {
+      return {
+        id: approved.id,
+        title: approved.name,
+        description: approved.content || `${approved.name}。该假设描述了在当前技术和市场环境下的核心判断，需要通过多维度数据和调研来验证其有效性。`,
+        owner: approved.owner,
+        createdAt: approved.createdAt,
+        updatedAt: approved.updatedAt,
+        recommendation: approved.reason || "基于当前市场环境和技术发展趋势，该假设具有较高的验证价值，建议重点关注相关赛道的核心标的和技术突破进展。",
+        relatedMaterials: [],
+      }
+    }
+    return null
+  }
+
+  const selectedDetail = selectedId ? getHypothesisDetail(selectedId) : null
 
   function handleViewDetail(id: string) {
     setSelectedId(id)

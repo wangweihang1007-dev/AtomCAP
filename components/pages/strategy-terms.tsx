@@ -265,21 +265,28 @@ export function StrategyTerms({
     )
   })
 
-  // 获取条款详情（从 mock 数据或已审批条款）
+  // 获取条款详情（从 mock 数据、按名称匹配或已审批条款）
   function getTermDetail(id: string): TermDetail | null {
     if (termDetails[id]) return termDetails[id]
+    // 根据名称匹配 — 新策略的条款 ID 与 mock 不同，但名称一致
+    const item = allTerms.find((t) => t.id === id)
+    if (item) {
+      const detailByName = Object.values(termDetails).find((d) => d.title === item.name)
+      if (detailByName) return { ...detailByName, id }
+    }
+    // 从 approved 条款构建基本详情
     const approved = strategyTerms.find((t) => t.id === id)
     if (approved) {
       return {
         id: approved.id,
         title: approved.name,
-        description: approved.content,
+        description: approved.content || `${approved.name}。该条款旨在保护投资方的核心权益，是投资保护条款体系的重要组成部分。`,
         owner: approved.owner,
         createdAt: approved.createdAt,
         updatedAt: approved.updatedAt,
-        recommendation: approved.recommendation,
-        relatedMaterials: approved.relatedMaterials,
-        relatedHypotheses: approved.relatedHypotheses,
+        recommendation: approved.recommendation || "基于当前投资赛道的特点和市场环境，该条款的设置有助于降低投资风险。",
+        relatedMaterials: approved.relatedMaterials || [],
+        relatedHypotheses: approved.relatedHypotheses || [],
       }
     }
     return null
