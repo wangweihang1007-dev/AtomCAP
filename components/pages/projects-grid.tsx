@@ -80,20 +80,6 @@ export interface PendingProject {
 
 export const initialProjects: Project[] = [
   {
-    id: "1",
-    name: "MiniMax",
-    logo: "M",
-    description: "通用人工智能科技公司，专注于大模型研发",
-    tags: ["AI", "B轮"],
-    status: "投前期",
-    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
-    round: "B轮",
-    owner: { id: "zhangwei", name: "张伟", initials: "张伟" },
-    strategyId: "1",
-    strategyName: "AI基础设施",
-    createdAt: "2023-10-15",
-  },
-  {
     id: "2",
     name: "月之暗面",
     logo: "月",
