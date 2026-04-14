@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: '专业的PE/VC投资决策与管理平台',
 }
 
+import { TRPCProvider } from '@/components/trpc-provider'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,7 +19,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <TRPCProvider>
+          {children}
+        </TRPCProvider>
+      </body>
     </html>
   )
 }
