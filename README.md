@@ -150,8 +150,11 @@ npm run dev
 ## 构建与部署
 
 ```bash
-# 生产构建（迁移 + 编译）
-npx prisma migrate deploy && next build
+# 生产构建（同步数据库 + 编译）
+npx prisma db push && next build
+
+# 或直接使用
+npm run build
 
 # 启动生产服务
 npm run start
