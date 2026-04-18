@@ -57,13 +57,14 @@ AtomCAP/
 │   │   └── api/
 │   │       ├── trpc.ts            # tRPC 初始化（router/procedure 定义）
 │   │       ├── root.ts            # tRPC 根路由（合并所有子路由）
-│   │       ├── context.ts         # tRPC 上下文（session 注入）
+│   │       ├── context.ts         # tRPC 上下文（session + db 注入）
 │   │       └── routers/
 │   │           ├── auth.ts        # 认证相关 tRPC 路由
 │   │           └── project.ts     # 项目相关 tRPC 路由
+│   ├── trpc/                      # tRPC 客户端（T3 标准）
+│   │   └── react.tsx              # React 客户端 api + TRPCReactProvider
 │   ├── components/                # React 组件
-│   │   ├── Providers.tsx          # 全局 Provider 组合（SessionProvider）
-│   │   ├── TRPCProvider.tsx       # tRPC + React Query Provider
+│   │   ├── Providers.tsx          # 全局 Provider 组合（Session + tRPC）
 │   │   ├── UserStatus.tsx         # 用户登录状态组件
 │   │   ├── app-topbar.tsx         # 顶部导航栏
 │   │   ├── app-sidebar.tsx        # 侧边栏
@@ -171,6 +172,26 @@ npm run start
 | `npm run db:migrate:dev` | 开发环境创建迁移（`prisma migrate dev`） |
 | `npm run db:generate` | 重新生成 Prisma 客户端 |
 | `npm run db:studio` | 启动 Prisma Studio 数据库管理界面 |
+
+## 添加业务逻辑（T3 工作流）
+
+在本项目中新增一个业务功能，遵循 tRPC → Prisma → React 的标准 T3 流程：
+
+1. **定义数据模型**（如涉及新表）
+   - 修改 `prisma/schema.prisma`
+   - 运行 `npm run db:push` 同步到数据库
+
+2. **编写 tRPC 路由**
+   - 在 `src/server/api/routers/` 下新建 `xxx.ts`
+   - 使用 `createTRPCRouter` + `publicProcedure` / `protectedProcedure` 定义 procedures
+   - 通过 `ctx.db` 访问 Prisma 客户端
+
+3. **注册路由**
+   - 在 `src/server/api/root.ts` 中 import 并合并到 `appRouter`
+
+4. **前端调用**
+   - 在任意客户端组件中：`import { api } from '@/src/trpc/react'`
+   - 使用 `api.xxx.yyy.useQuery()` / `.useMutation()`
 
 ## 环境变量
 

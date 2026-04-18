@@ -7,6 +7,13 @@ import { useState } from 'react'
 import superjson from 'superjson'
 import { type AppRouter } from '@/src/server/api/root'
 
+/**
+ * tRPC React 客户端（T3 Stack 标准位置）
+ *
+ * 在组件中使用：
+ *   const { data } = api.project.getAll.useQuery()
+ *   const create = api.project.create.useMutation()
+ */
 export const api = createTRPCReact<AppRouter>()
 
 function getBaseUrl() {
@@ -19,7 +26,10 @@ function getBaseUrl() {
   return `http://localhost:${process.env.PORT ?? 3000}`
 }
 
-export function TRPCProvider({ children }: { children: React.ReactNode }) {
+/**
+ * tRPC + React Query Provider，应在根 layout 中包裹全部子组件
+ */
+export function TRPCReactProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())
   const [trpcClient] = useState(() =>
     api.createClient({
