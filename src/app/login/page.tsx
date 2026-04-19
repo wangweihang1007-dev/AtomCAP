@@ -1,23 +1,29 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Eye, EyeOff, RefreshCw, Lock, User, ShieldCheck } from "lucide-react"
 import { Input } from "@/src/components/ui/input"
 import { cn } from "@/src/lib/utils"
 import Image from "next/image"
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
-interface LoginProps {
-  onLogin: () => void
-}
-
-export function Login({ onLogin }: LoginProps) {
+export default function LoginPage() {
+  const router = useRouter()
+  const { status } = useSession()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [captchaInput, setCaptchaInput] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // 已登录用户访问 /login 时自动跳转到主页
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/")
+    }
+  }, [status, router])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -40,8 +46,8 @@ export function Login({ onLogin }: LoginProps) {
       if (result?.error) {
         setError("邮箱或密码错误，请重试")
       } else {
-        // 登录成功，useSession() 会自动检测到 session 变化
-        onLogin()
+        router.push("/")
+        router.refresh()
       }
     } catch (err) {
       setError("登录失败，请稍后重试")

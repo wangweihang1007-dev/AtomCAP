@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { AppTopbar, type TopNavKey } from "@/src/components/app-topbar"
 import { Dashboard } from "@/src/components/pages/dashboard"
 import { ProjectsGrid, type Project, type PendingProject, initialProjects, getStatusColor } from "@/src/components/pages/projects-grid"
@@ -11,7 +12,6 @@ import type { AnalysisFramework, PendingFramework } from "@/src/components/pages
 import { ProjectDetail } from "@/src/components/pages/project-detail"
 import { StrategyDetail } from "@/src/components/pages/strategy-detail"
 import { ChangeRequests } from "@/src/components/pages/change-requests"
-import { Login } from "@/src/components/pages/login"
 import type { Phase, PendingPhase, LiXiangRecord, TouJueRecord, HuaKuanRecord, TuiChuRecord, PendingProjectHypothesis, ProjectHypothesisFormData, GeneratedSuggestion, GeneratedTermSuggestion, PendingProjectTerm, PendingProjectMaterial, GeneratedMaterialSuggestion, GeneratedAiResearchGroup, PendingCommitteeDecision, CommitteeDecisionFormData, PendingNegotiationDecision, NegotiationDecisionFormData, PendingVerification, VerificationFormData, PendingImplementationStatus, ImplementationStatusFormData } from "@/src/components/pages/workflow"
 import { type HypothesisTableItem, type HypothesisDetail, type ValuePoint, type RiskPoint, getTemplateHypothesesForStrategy, midInvestmentHypotheses } from "@/src/components/pages/hypothesis-checklist"
 import { type TermTableItem, type TermDetail, getTemplateTermsForStrategy, midInvestmentTerms, postInvestmentTerms } from "@/src/components/pages/term-sheet"
@@ -20,7 +20,6 @@ import { getTrackStrategyHypothesisTemplate } from "@/src/components/pages/strat
 import { getTrackStrategyTermTemplate } from "@/src/components/pages/strategy-terms"
 
 type ViewState =
-  | { type: "login" }
   | { type: "dashboard" }
   | { type: "projects" }
   | { type: "strategies" }
@@ -29,7 +28,8 @@ type ViewState =
   | { type: "strategy-detail"; strategyId: string; initialSubPage?: "overview" | "hypotheses" | "terms" | "materials" }
 
 export default function Page() {
-  const [view, setView] = useState<ViewState>({ type: "login" })
+  const router = useRouter()
+  const [view, setView] = useState<ViewState>({ type: "dashboard" })
   const [strategies, setStrategies] = useState<Strategy[]>(initialStrategies)
   const [pendingStrategies, setPendingStrategies] = useState<PendingStrategy[]>([])
   const [projects, setProjects] = useState<Project[]>(initialProjects)
@@ -84,14 +84,12 @@ export default function Page() {
 
   const { data: session, status } = useSession()
 
-  // 检查登录状态
+  // 未登录用户跳转至 /login 路由
   useEffect(() => {
-    if (status === "authenticated") {
-      setView({ type: "dashboard" })
-    } else if (status === "unauthenticated") {
-      setView({ type: "login" })
+    if (status === "unauthenticated") {
+      router.replace("/login")
     }
-  }, [status])
+  }, [status, router])
 
   const activeNav: TopNavKey | null =
     view.type === "dashboard"
@@ -103,10 +101,6 @@ export default function Page() {
           : view.type === "change-requests"
             ? "change-requests"
             : null
-
-  function handleLogin() {
-    setView({ type: "dashboard" })
-  }
 
   function handleTopNav(nav: TopNavKey) {
     if (nav === "dashboard") {
@@ -1277,16 +1271,13 @@ export default function Page() {
     })
   }
 
-  if (status === "loading") {
+  // 加载中或未登录时（等待 useEffect 跳转），显示加载态，避免渲染主界面
+  if (status === "loading" || status === "unauthenticated") {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-gray-500">加载中...</div>
       </div>
     )
-  }
-
-  if (view.type === "login") {
-    return <Login onLogin={handleLogin} />
   }
 
   return (
