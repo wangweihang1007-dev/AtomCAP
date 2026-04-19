@@ -47,8 +47,10 @@ export default function ProjectsPage() {
     if (nav === "projects") return
     if (nav === "dashboard") {
       router.push("/dashboard")
+    } else if (nav === "strategies") {
+      router.push("/strategies")
     } else {
-      // strategies / change-requests 仍由 "/" 下的 SPA 承载
+      // change-requests 仍由 "/" 下的 SPA 承载
       router.push(`/?nav=${nav}`)
     }
   }
