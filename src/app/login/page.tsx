@@ -1,15 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Eye, EyeOff, RefreshCw, Lock, User, ShieldCheck } from "lucide-react"
 import { Input } from "@/src/components/ui/input"
 import { cn } from "@/src/lib/utils"
 import Image from "next/image"
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { status } = useSession()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [captchaInput, setCaptchaInput] = useState("")
@@ -17,9 +18,22 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
+  // 已登录用户访问 /login 时自动跳转到主页
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/")
+    }
+  }, [status, router])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError("")
+
+    if (!username || !password) {
+      setError("请输入用户名和密码")
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -30,7 +44,7 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError(result.error)
+        setError("邮箱或密码错误，请重试")
       } else {
         router.push("/")
         router.refresh()
@@ -65,14 +79,14 @@ export default function LoginPage() {
 
             {/* Username */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[#374151]">用户名</label>
+              <label className="text-sm font-medium text-[#374151]">邮箱</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
                 <Input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="请输入用户名"
+                  placeholder="请输入邮箱"
                   className="pl-9 h-10 border-[#E5E7EB] bg-white text-[#111827] placeholder:text-[#9CA3AF] focus-visible:ring-[#2563EB] focus-visible:border-[#2563EB]"
                 />
               </div>
@@ -116,13 +130,14 @@ export default function LoginPage() {
                     className="pl-9 h-10 border-[#E5E7EB] bg-white text-[#111827] placeholder:text-[#9CA3AF] focus-visible:ring-[#2563EB] focus-visible:border-[#2563EB] uppercase tracking-widest"
                   />
                 </div>
-                <div className="relative h-10 w-24 shrink-0 overflow-hidden rounded-md border border-[#E5E7EB] bg-white cursor-pointer hover:opacity-80 transition-opacity">
+                <div className="relative h-10 w-24 shrink-0 overflow-hidden rounded-md border border-[#E5E7EB]">
                   <Image
                     src="/captcha.jpg"
-                    alt="验证码"
+                    alt="验证码图片"
                     fill
                     sizes="96px"
                     className="object-cover"
+                    priority
                   />
                 </div>
               </div>
@@ -151,13 +166,12 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-xs text-[#9CA3AF]">
             首次使用请{" "}
-            <button 
-              type="button" 
+            <a
+              href="/register"
               className="text-[#2563EB] hover:underline transition-colors"
-              onClick={() => router.push("/register")}
             >
-              联系管理员获取账号
-            </button>
+              注册新账号
+            </a>
           </p>
         </div>
 
@@ -200,12 +214,12 @@ export default function LoginPage() {
             专业投资决策，尽在掌握
           </h2>
           <p className="text-sm text-[#4B6A8A] leading-relaxed max-w-xs">
-            AtomCAP 为 PE/VC 机构提供全流程投资决策管理，AI 驱动更智慧的投资判断
+            AtomCAP 为 PE/VC 机构提供全流程投资决策管理，AI驱动更智慧的投资判断
           </p>
 
           {/* Feature tags */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-            {["策略管理", "假设验证", "条款构建", "AI 赋能"].map((tag) => (
+            {["策略管理", "假设验证", "条款构建", "AI赋能"].map((tag) => (
               <span
                 key={tag}
                 className="rounded-full border border-[#BFDBFE] bg-white/60 px-3.5 py-1 text-xs font-medium text-[#2563EB]"
