@@ -217,6 +217,75 @@ async function seedProjects() {
   })
 }
 
+/**
+ * 策略列表 seed
+ *
+ * Strategy 没有外键依赖（不挂到 User 也不挂到 Project），
+ * 所以直接 deleteMany + createMany 即可保持幂等。
+ *
+ * iconName 的取值必须与 /strategies 页里 ICON_MAP 的 key 对齐
+ * （CPU / Target / Building / Zap / Leaf / Trending / Briefcase），
+ * 否则前端会回退到 Target 图标。
+ */
+async function seedStrategies() {
+  await prisma.strategy.deleteMany()
+
+  await prisma.strategy.createMany({
+    data: [
+      {
+        name: 'AI 基础设施',
+        iconName: 'CPU',
+        frameworkName: '早期项目筛选框架',
+        description: '聚焦 AI 算力、模型训练框架和基础软件生态投资。',
+        managerName: '张伟',
+        projectCount: 12,
+        totalInvestment: '8.5亿',
+        returnRate: '+32%',
+      },
+      {
+        name: '大模型应用',
+        iconName: 'Target',
+        frameworkName: '早期项目筛选框架',
+        description: '关注大语言模型的企业级和消费级应用落地场景。',
+        managerName: '李四',
+        projectCount: 8,
+        totalInvestment: '5.2亿',
+        returnRate: '+18%',
+      },
+      {
+        name: '企业数字化',
+        iconName: 'Building',
+        frameworkName: '价值投资评估框架',
+        description: '聚焦企业数字化转型、智能化升级和业务流程优化。',
+        managerName: '王芳',
+        projectCount: 15,
+        totalInvestment: '12亿',
+        returnRate: '+25%',
+      },
+      {
+        name: '生物科技',
+        iconName: 'Zap',
+        frameworkName: '早期项目筛选框架',
+        description: '布局 AI 制药、基因治疗和精准医疗等前沿领域。',
+        managerName: '赵强',
+        projectCount: 6,
+        totalInvestment: '4.8亿',
+        returnRate: '+12%',
+      },
+      {
+        name: '清洁能源',
+        iconName: 'Leaf',
+        frameworkName: 'ESG 合规审查框架',
+        description: '聚焦新能源、储能技术和绿色低碳产业投资。',
+        managerName: '李四',
+        projectCount: 10,
+        totalInvestment: '18亿',
+        returnRate: '+28%',
+      },
+    ],
+  })
+}
+
 async function main() {
   console.log('🌱 Seeding database...')
 
@@ -231,6 +300,9 @@ async function main() {
 
   await seedProjects()
   console.log('  ✔ Project (×2)')
+
+  await seedStrategies()
+  console.log('  ✔ Strategy (×5)')
 
   console.log('✅ Seed complete')
 }
