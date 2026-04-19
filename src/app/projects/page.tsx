@@ -74,6 +74,7 @@ export default function ProjectsPage() {
       logo: p.logo || undefined,
       tags: p.tags.length > 0 ? p.tags.join(",") : undefined,
       round: p.round || undefined,
+      valuation: p.valuation || undefined,
       managerId: p.owner.id || undefined,
       managerName: p.owner.name || undefined,
     })

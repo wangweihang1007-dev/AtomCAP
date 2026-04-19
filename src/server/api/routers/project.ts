@@ -44,7 +44,7 @@ export const projectRouter = createTRPCRouter({
         tags: project.tags ? project.tags.split(",") : [],
         status: project.stage || "未立项",
         statusColor: getStatusColor(project.stage),
-        valuation: "估值未知",
+        valuation: project.valuation || "待定",
         round: project.round || "未知轮次",
         owner: {
           id: project.managerId || "1",
@@ -104,6 +104,7 @@ export const projectRouter = createTRPCRouter({
         logo: z.string().optional(),
         tags: z.string().optional(),
         round: z.string().optional(),
+        valuation: z.string().optional(),
         managerId: z.string().optional(),
         managerName: z.string().optional(),
       })
@@ -129,6 +130,7 @@ export const projectRouter = createTRPCRouter({
             logo: input.logo,
             tags: input.tags,
             round: input.round,
+            valuation: input.valuation,
             managerId: input.managerId,
             managerName: input.managerName,
             creatorId: ctx.session.user.id,
@@ -160,6 +162,7 @@ export const projectRouter = createTRPCRouter({
         industry: z.string().optional(),
         stage: z.string().optional(),
         budget: z.number().optional(),
+        valuation: z.string().optional(),
       })
     )
     .mutation(async ({ input }: { input: any }) => {
