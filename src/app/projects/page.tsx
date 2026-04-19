@@ -60,12 +60,10 @@ export default function ProjectsPage() {
   }
 
   /**
-   * 目前 ProjectsGrid 的"新建项目"会产出一条 PendingProject（走前端审批流）。
-   * 为了尽快落库，这里直接把它映射成 `api.project.create` 的 mutation：
-   *   - name / description / stage / tags 走后端字段
-   *   - 标签以逗号拼接后存入 Project.tags（与 getProjsForGrid 反向解析一致）
-   *
-   * 后续若要恢复"变更请求"审批流，可在此处分叉：先存 PendingProject，再在审批通过时调用 mutation。
+   * US-003: 创建新项目
+   * ProjectsGrid 的"新建项目"产出 PendingProject，直接落库。
+   * 支持字段：公司名称、描述、赛道标签、投资轮次、负责人
+   * 项目编号由Prisma自动生成(cuid)
    */
   function handleCreatePending(pending: PendingProject) {
     const p = pending.project
@@ -73,6 +71,11 @@ export default function ProjectsPage() {
       name: p.name,
       description: p.description || undefined,
       stage: p.status || undefined,
+      logo: p.logo || undefined,
+      tags: p.tags.length > 0 ? p.tags.join(",") : undefined,
+      round: p.round || undefined,
+      managerId: p.owner.id || undefined,
+      managerName: p.owner.name || undefined,
     })
   }
 

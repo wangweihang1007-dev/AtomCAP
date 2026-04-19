@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '../trpc'
 import { prisma } from '../../db'
 import type { Context } from '../context'
+import { TRPCError } from '@trpc/server'
 
 export const projectRouter = createTRPCRouter({
   /**
@@ -86,7 +87,9 @@ export const projectRouter = createTRPCRouter({
     }),
 
   /**
-   * 创建新项目
+   * 创建新项目 - US-003
+   * 支持字段：公司名称、描述、赛道标签、投资轮次、负责人
+   * 项目编号由Prisma自动生成(cuid)
    */
   create: protectedProcedure
     .input(
@@ -98,17 +101,49 @@ export const projectRouter = createTRPCRouter({
         industry: z.string().optional(),
         stage: z.string().optional(),
         budget: z.number().optional(),
+        logo: z.string().optional(),
+        tags: z.string().optional(),
+        round: z.string().optional(),
+        managerId: z.string().optional(),
+        managerName: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
-      const project = await prisma.project.create({
-        data: {
-          ...input,
-          creatorId: ctx.session.user.id,
-        },
-      })
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: '用户未登录或会话已过期',
+        })
+      }
 
-      return project
+      try {
+        const project = await prisma.project.create({
+          data: {
+            name: input.name,
+            description: input.description,
+            status: input.status,
+            priority: input.priority,
+            industry: input.industry,
+            stage: input.stage,
+            budget: input.budget,
+            logo: input.logo,
+            tags: input.tags,
+            round: input.round,
+            managerId: input.managerId,
+            managerName: input.managerName,
+            creatorId: ctx.session.user.id,
+          },
+        })
+
+        return project
+      } catch (error: any) {
+        console.error('[project.create] Database error:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error?.message || '创建项目失败',
+          cause: error,
+        })
+      }
     }),
 
   /**
