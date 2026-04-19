@@ -32,10 +32,8 @@ AtomCAP/
 │   ├── env.mjs                    # 环境变量运行时校验（T3 标准）
 │   ├── app/                       # Next.js App Router 页面与 API
 │   │   ├── layout.tsx             # 根布局（Providers 包裹）
-│   │   ├── page.tsx               # 首页（主应用入口）
+│   │   ├── page.tsx               # 首页（SPA 主入口，未登录时显示登录组件）
 │   │   ├── globals.css            # 全局样式
-│   │   ├── login/
-│   │   │   └── page.tsx           # 登录页面
 │   │   ├── register/
 │   │   │   └── page.tsx           # 注册页面
 │   │   └── api/
@@ -68,7 +66,6 @@ AtomCAP/
 │   │   ├── UserStatus.tsx         # 用户登录状态组件
 │   │   ├── app-topbar.tsx         # 顶部导航栏
 │   │   ├── app-sidebar.tsx        # 侧边栏
-│   │   ├── Header.tsx             # 页面头部
 │   │   ├── theme-provider.tsx     # 主题切换 Provider
 │   │   ├── pages/                 # 页面级业务组件
 │   │   │   ├── dashboard.tsx      # 仪表盘
