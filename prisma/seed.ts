@@ -159,6 +159,64 @@ async function seedDashboardTodos() {
   })
 }
 
+/**
+ * 项目列表 seed
+ *
+ * Project 需要 creatorId 指向一个真实 User（外键 + onDelete: Cascade），
+ * 所以先 upsert 一个专门的种子账号 `seed@atomcap.local`。
+ *
+ * 幂等策略：
+ *   - 种子用户用 upsert（按 email 唯一约束命中）
+ *   - 只删除 `creatorId == seedUser.id` 的项目，避免误删真实数据
+ *   - 相关 Task / Document 在 schema 里配置了 onDelete: Cascade，会随之清理
+ */
+async function seedProjects() {
+  const seedUser = await prisma.user.upsert({
+    where: { email: 'seed@atomcap.local' },
+    update: {},
+    create: {
+      email: 'seed@atomcap.local',
+      name: 'Seed User',
+    },
+  })
+
+  await prisma.project.deleteMany({ where: { creatorId: seedUser.id } })
+
+  await prisma.project.createMany({
+    data: [
+      {
+        name: '月之暗面',
+        description: '新一代 AI 搜索与对话平台，聚焦长上下文与复杂推理能力。',
+        logo: '月',
+        tags: 'AI,A轮',
+        status: '投中期',
+        stage: '投中阶段',
+        round: 'A轮',
+        industry: '人工智能',
+        managerId: 'lisi',
+        managerName: '李四',
+        totalInvestment: 1.2, // 亿元
+        creatorId: seedUser.id,
+      },
+      {
+        name: '智谱 AI',
+        description: '认知大模型技术与企业级应用开发，国产大模型第一梯队。',
+        logo: '智',
+        tags: 'AI,C轮',
+        status: '投后期',
+        stage: '投后阶段',
+        round: 'C轮',
+        industry: '人工智能',
+        managerId: 'wangfang',
+        managerName: '王芳',
+        totalInvestment: 3.5,
+        irr: 28.4,
+        creatorId: seedUser.id,
+      },
+    ],
+  })
+}
+
 async function main() {
   console.log('🌱 Seeding database...')
 
@@ -170,6 +228,9 @@ async function main() {
 
   await seedDashboardTodos()
   console.log('  ✔ DashboardTodo')
+
+  await seedProjects()
+  console.log('  ✔ Project (×2)')
 
   console.log('✅ Seed complete')
 }
