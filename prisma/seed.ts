@@ -286,6 +286,50 @@ async function seedStrategies() {
   })
 }
 
+async function seedHypotheses() {
+  await prisma.hypothesis.deleteMany()
+
+  await prisma.hypothesis.createMany({
+    data: [
+      {
+        direction: '团队与组织能力',
+        category: '创始人闫俊杰',
+        name: '创始人闫俊杰具有扎实的人工智能学术背景',
+        owner: '张伟',
+        status: 'verified',
+      },
+      {
+        direction: '团队与组织能力',
+        category: '创始人闫俊杰',
+        name: '创始人具备丰富的AI产品商业化经验',
+        owner: '李四',
+        status: 'pending',
+      },
+      {
+        direction: '团队与组织能力',
+        category: '核心团队',
+        name: '技术团队在大模型训练和推理优化方面具备业界领先水平',
+        owner: '王五',
+        status: 'pending',
+      },
+      {
+        direction: '市场机会',
+        category: '市场规模',
+        name: '企业级AI应用市场可服务规模达到200亿元',
+        owner: '李四',
+        status: 'risky',
+      },
+      {
+        direction: '商业模式',
+        category: '用户价值',
+        name: 'MiniMax可触达市场规模约50亿元',
+        owner: '王五',
+        status: 'pending',
+      },
+    ],
+  })
+}
+
 async function main() {
   console.log('🌱 Seeding database...')
 
@@ -303,6 +347,9 @@ async function main() {
 
   await seedStrategies()
   console.log('  ✔ Strategy (×5)')
+
+  await seedHypotheses()
+  console.log('  ✔ Hypotheses (×5)')
 
   console.log('✅ Seed complete')
 }

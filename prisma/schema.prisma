@@ -165,3 +165,16 @@ model Strategy {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+// ==================== 假设清单 ====================
+model Hypothesis {
+  id          String   @id @default(cuid())
+  direction   String?  @db.VarChar(100)
+  category    String?  @db.VarChar(100)
+  name        String   @db.VarChar(255)
+  owner       String?  @db.VarChar(50)
+  status      String?  @default("pending") @db.VarChar(20)
+  projectId   String?  @db.VarChar(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

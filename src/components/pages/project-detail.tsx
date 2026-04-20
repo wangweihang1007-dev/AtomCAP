@@ -18,6 +18,7 @@ import { Workflow, type Phase, type PendingPhase, type PendingProjectHypothesis,
 import { ProjectMaterials } from "@/src/components/pages/project-materials"
 import { type Project } from "@/src/components/pages/projects-grid"
 import { type StrategyMaterial } from "@/src/components/pages/strategies-grid"
+import { api } from "@/src/trpc/react"
 
 type SubPageKey =
   | "overview"
@@ -84,6 +85,17 @@ interface ProjectDetailProps {
 }
 
 export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCreatePendingPhase, onCreatePendingProjectHypothesis, projectHypotheses, projectHypothesisDetails, projectTerms, projectMaterials, savedGeneratedSuggestions, onSaveSuggestions, savedGeneratedTermSuggestions, onSaveTermSuggestions, onCreatePendingProjectTerm, projectTermDetails, onCreatePendingProjectMaterial, savedGeneratedMaterialSuggestions, onSaveMaterialSuggestions, savedGeneratedAiResearchGroups, onSaveAiResearchGroups, onAddValuePoint, onAddRiskPoint, onCreateCommitteeDecision, onCreateNegotiationDecision, onCreateVerification, onCreateImplementationStatus, isExited, liXiangRecord, touJueRecord, huaKuanRecord, tuiChuRecord }: ProjectDetailProps) {
+  const utils = api.useUtils()
+  const { data: dbHypotheses } = api.hypothesis.getAll.useQuery()
+  const { data: dbDetails } = api.hypothesis.getDetails.useQuery()
+  
+  const deleteMutation = api.hypothesis.delete.useMutation({
+    onSuccess: () => {
+      utils.hypothesis.getAll.invalidate()
+      utils.hypothesis.getDetails.invalidate()
+    }
+  })
+
   const [activeSubPage, setActiveSubPage] = useState<SubPageKey>("overview")
   const [collapsed, setCollapsed] = useState(false)
   const isNewProject = projectId.startsWith("new-project-")
@@ -206,12 +218,13 @@ export function ProjectDetail({ projectId, project, phases, onPhasesChange, onCr
             isPostInvestment={isPostInvestment}
             project={project}
             projectMaterials={projectMaterials}
-            inheritedHypotheses={projectHypotheses}
-            extraDetails={projectHypothesisDetails}
+            inheritedHypotheses={dbHypotheses || projectHypotheses}
+            extraDetails={dbDetails || projectHypothesisDetails}
             onAddValuePoint={onAddValuePoint}
             onAddRiskPoint={onAddRiskPoint}
             onCreateCommitteeDecision={onCreateCommitteeDecision}
             onCreateVerification={onCreateVerification}
+            onDeleteHypothesis={(id) => deleteMutation.mutate({ id })}
           />
         ) : activeSubPage === "terms" ? (
           <TermSheet

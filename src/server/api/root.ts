@@ -4,11 +4,14 @@ import { dashboardRouter } from './routers/dashboard'
 import { strategyRouter } from './routers/strategy'
 import { createTRPCRouter } from './trpc'
 
+import { hypothesisRouter } from './routers/hypothesis'
+
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   project: projectRouter,
   dashboard: dashboardRouter,
   strategy: strategyRouter,
+  hypothesis: hypothesisRouter,
 })
 
 export type AppRouter = typeof appRouter

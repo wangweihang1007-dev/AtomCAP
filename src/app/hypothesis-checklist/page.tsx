@@ -1161,7 +1161,7 @@ interface HypothesisChecklistProps {
   onDeleteHypothesis?: (id: string) => void
 }
 
-export function HypothesisChecklist({ isNewProject = false, isInDuration = false, isExited = false, isMidInvestment = false, isPostInvestment = false, project, projectMaterials, inheritedHypotheses, extraDetails, onAddValuePoint, onAddRiskPoint, onCreateCommitteeDecision, onCreateVerification, onDeleteHypothesis }: HypothesisChecklistProps) {
+export default function HypothesisChecklist({ isNewProject = false, isInDuration = false, isExited = false, isMidInvestment = false, isPostInvestment = false, project, projectMaterials, inheritedHypotheses, extraDetails, onAddValuePoint, onAddRiskPoint, onCreateCommitteeDecision, onCreateVerification, onDeleteHypothesis }: HypothesisChecklistProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showDetail, setShowDetail] = useState(false)
