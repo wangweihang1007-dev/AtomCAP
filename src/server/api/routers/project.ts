@@ -41,11 +41,11 @@ export const projectRouter = createTRPCRouter({
         name: project.name,
         logo: project.logo || (project.name.length > 0 ? project.name[0] : "P"),
         description: project.description || "",
-        tags: project.tags ? project.tags.split(",") : [],
+        tags: project.tags ? project.tags.split(",").map(t => t.replace(/[{}]/g, "").trim()) : [],
         status: project.stage || "未立项",
         statusColor: getStatusColor(project.stage),
         valuation: project.valuation || "待定",
-        round: project.round || "未知轮次",
+        round: (project.round || "未知轮次").replace(/[{}]/g, ""),
         owner: {
           id: project.managerId || "1",
           name: project.managerName || "未指派",

@@ -14,6 +14,11 @@ import { initialStrategies } from "@/src/components/pages/strategies-grid"
 
 /**
  * /projects 路由 — 项目列表页
+ * 
+ * 【需求实现 - US-004】作为投资经理，我可以在项目列表页查看所有项目并筛选
+ * - 视图：卡片视图展示所有项目（通过 ProjectsGrid 实现）
+ * - 展示字段：公司名、描述、负责人、标签、项目阶段
+ * - 筛选功能：支持按阶段、标签、负责人筛选及全局搜索
  *
  * 数据源：tRPC `api.project.getProjsForGrid`
  * 新建项目：tRPC `api.project.create`（mutation 成功后自动 refetch）

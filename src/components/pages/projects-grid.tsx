@@ -189,7 +189,14 @@ interface ProjectsGridProps {
 
 export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectProject, onCreatePending }: ProjectsGridProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const [filterStage, setFilterStage] = useState("ALL")
+  const [filterTag, setFilterTag] = useState("ALL")
+  const [filterOwner, setFilterOwner] = useState("ALL")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+
+  // Derived filter options
+  const allStages = Array.from(new Set(projects.map(p => p.status))).sort()
+  const allTags = Array.from(new Set(projects.flatMap(p => p.tags))).sort()
 
   // Form state
   const [newName, setNewName] = useState("")
@@ -211,11 +218,14 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
   const [newTags, setNewTags] = useState("")
 
-  const filteredProjects = projects.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredProjects = projects.filter((p) => {
+    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.description.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+    const matchStage = filterStage === "ALL" || p.status === filterStage
+    const matchTag = filterTag === "ALL" || p.tags.includes(filterTag)
+    const matchOwner = filterOwner === "ALL" || p.owner.id === filterOwner
+    return matchSearch && matchStage && matchTag && matchOwner
+  })
 
   function handleCreate() {
     if (!newName.trim() || !selectedStrategyId) return
@@ -384,19 +394,44 @@ export function ProjectsGrid({ projects, strategies, onProjectsChange, onSelectP
             <div>
               <h1 className="text-2xl font-bold text-[#111827]">项目列表</h1>
               <p className="text-sm text-[#6B7280]">
-                共 {projects.length} 个投资项目
+                共 {filteredProjects.length} 个投资项目
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2">
+            <select
+              value={filterStage}
+              onChange={(e) => setFilterStage(e.target.value)}
+              className="h-9 w-28 rounded-lg border border-[#E5E7EB] bg-white px-2 py-1.5 text-sm text-[#374151] outline-none hover:border-[#D1D5DB] focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all cursor-pointer"
+            >
+              <option value="ALL">所有阶段</option>
+              {allStages.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <select
+              value={filterTag}
+              onChange={(e) => setFilterTag(e.target.value)}
+              className="h-9 w-28 rounded-lg border border-[#E5E7EB] bg-white px-2 py-1.5 text-sm text-[#374151] outline-none hover:border-[#D1D5DB] focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all cursor-pointer"
+            >
+              <option value="ALL">所有标签</option>
+              {allTags.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <select
+              value={filterOwner}
+              onChange={(e) => setFilterOwner(e.target.value)}
+              className="h-9 w-28 rounded-lg border border-[#E5E7EB] bg-white px-2 py-1.5 text-sm text-[#374151] outline-none hover:border-[#D1D5DB] focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all cursor-pointer"
+            >
+              <option value="ALL">所有负责人</option>
+              {availableOwners.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+            </select>
+
+            <div className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 focus-within:border-[#2563EB] focus-within:ring-1 focus-within:ring-[#2563EB] transition-all">
               <Search className="h-4 w-4 text-[#9CA3AF]" />
               <input
                 type="text"
-                placeholder="搜索项目..."
+                placeholder="搜索名称或描述..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-48 bg-transparent text-sm text-[#374151] outline-none placeholder:text-[#9CA3AF]"
+                className="w-40 bg-transparent text-sm text-[#374151] outline-none placeholder:text-[#9CA3AF]"
               />
             </div>
             <button
